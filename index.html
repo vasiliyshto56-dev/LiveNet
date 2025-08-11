@@ -99,220 +99,6 @@
             transform: translateY(-2px) rotateX(10deg);
         }
 
-        /* Live Button Glow Effect */
-        .live-btn {
-            position: relative;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-            animation: pulse-glow 2s ease-in-out infinite alternate;
-        }
-
-        .live-btn::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: linear-gradient(45deg, #ef4444, #ec4899, #8b5cf6, #ef4444);
-            background-size: 300% 300%;
-            border-radius: inherit;
-            z-index: -1;
-            animation: gradient-rotate 4s ease infinite;
-        }
-
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
-            100% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.8), 0 0 60px rgba(236, 72, 153, 0.3); }
-        }
-
-        @keyframes gradient-rotate {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Mobile Menu Animations */
-        .mobile-menu-btn {
-            width: 40px;
-            height: 40px;
-        }
-
-        .hamburger {
-            width: 24px;
-            height: 18px;
-            position: relative;
-            margin: auto;
-        }
-
-        .hamburger span {
-            display: block;
-            position: absolute;
-            height: 3px;
-            width: 100%;
-            background: white;
-            border-radius: 2px;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .hamburger span:nth-child(1) { top: 0; }
-        .hamburger span:nth-child(2) { top: 7px; }
-        .hamburger span:nth-child(3) { top: 14px; }
-
-        .mobile-menu-btn.active .hamburger span:nth-child(1) {
-            top: 7px;
-            transform: rotate(45deg);
-        }
-
-        .mobile-menu-btn.active .hamburger span:nth-child(2) {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-
-        .mobile-menu-btn.active .hamburger span:nth-child(3) {
-            top: 7px;
-            transform: rotate(-45deg);
-        }
-
-        .mobile-menu.active {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .mobile-menu-item {
-            transform: translateX(-20px);
-            opacity: 0;
-            animation: slideInLeft 0.3s ease forwards;
-        }
-
-        .mobile-menu-item:nth-child(1) { animation-delay: 0.1s; }
-        .mobile-menu-item:nth-child(2) { animation-delay: 0.2s; }
-        .mobile-menu-item:nth-child(3) { animation-delay: 0.3s; }
-        .mobile-menu-item:nth-child(4) { animation-delay: 0.4s; }
-        .mobile-menu-item:nth-child(5) { animation-delay: 0.5s; }
-
-        @keyframes slideInLeft {
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Glass Morphism Effect */
-        nav {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .floating-particles {
-                display: none;
-            }
-            
-            nav {
-                padding: 1rem;
-            }
-            
-            .live-btn {
-                padding: 0.75rem 1.5rem;
-                font-size: 0.875rem;
-            }
-        }
-
-        /* Enhanced Glow Effects */
-        .menu-item:hover::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            border-radius: 12px;
-            z-index: -1;
-            animation: glow-border 2s ease infinite;
-        }
-
-        @keyframes glow-border {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
-        /* Footer Animations */
-        .footer-stars {
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #fff, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
-                radial-gradient(2px 2px at 160px 30px, #fff, transparent);
-            background-repeat: repeat;
-            background-size: 200px 100px;
-            animation: sparkle 8s ease-in-out infinite;
-            width: 100%;
-            height: 100%;
-        }
-
-        .footer-glow {
-            background: radial-gradient(ellipse at center, rgba(147, 51, 234, 0.1) 0%, transparent 70%);
-            animation: pulse-glow-footer 4s ease-in-out infinite alternate;
-        }
-
-        @keyframes sparkle {
-            0%, 100% { transform: translateY(0); opacity: 1; }
-            50% { transform: translateY(-10px); opacity: 0.8; }
-        }
-
-        @keyframes pulse-glow-footer {
-            0% { transform: scale(1); opacity: 0.3; }
-            100% { transform: scale(1.05); opacity: 0.6; }
-        }
-
-        .footer-social-btn {
-            position: relative;
-            min-width: 120px;
-            min-height: 100px;
-        }
-
-        .footer-social-btn::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            border-radius: 14px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: -1;
-        }
-
-        .footer-social-btn:hover::before {
-            opacity: 1;
-        }
-
-        /* Animated Gradient Background */
-        .bg-size-200 {
-            background-size: 200% 200%;
-        }
-
-        @keyframes gradient-slide {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .animate-gradient-slide {
-            animation: gradient-slide 4s ease infinite;
-        }
-
-        /* Enhanced Responsive Design */
-        @media (max-width: 768px) {
-            .footer-social-btn {
-                min-width: 100px;
-                min-height: 80px;
-            }
-            
-            .footer-stars {
-                background-size: 150px 75px;
-            }
-        }
-
         /* New Button Styles */
         .hero-btn {
             position: relative;
@@ -388,22 +174,12 @@
             transform: scale(1);
         }
 
-        /* Button Animations */
-        @keyframes button-pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4);
-            }
-            50% {
-                box-shadow: 0 0 0 20px rgba(147, 51, 234, 0);
-            }
-        }
-
-        .hero-btn:active {
-            animation: button-pulse 0.4s ease;
-        }
-
-        /* Mobile Button Optimizations */
+        /* Responsive Design */
         @media (max-width: 768px) {
+            .floating-particles {
+                display: none;
+            }
+            
             .hero-btn, .stream-btn {
                 padding: 1rem 2rem;
                 font-size: 1rem;
@@ -433,7 +209,7 @@
                 <div class="flex items-center space-x-4 group">
                     <div class="relative">
                         <div class="absolute -inset-2 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full blur opacity-60 group-hover:opacity-100 transition-all duration-300 animate-pulse"></div>
-                        <img src="https://imgur.com/a/UNNG2sc" alt="LiveNet Logo" class="relative w-16 h-16 rounded-full border-2 border-white/30 transform group-hover:scale-110 transition-all duration-300 shadow-xl object-cover">
+                        <img src="wNouL6HINHnQ9QyTaC4Jx" alt="LiveNet Logo" class="relative w-16 h-16 rounded-full border-2 border-white/30 transform group-hover:scale-110 transition-all duration-300 shadow-xl object-cover">
                     </div>
                     <div class="relative">
                         <h1 class="text-3xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent drop-shadow-lg">
@@ -447,63 +223,26 @@
                 <div class="hidden lg:flex space-x-8">
                     <a href="#home" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl">
                         <span class="relative z-10 text-white font-semibold group-hover:text-purple-100 transition-colors duration-300"><i class="fas fa-home mr-2"></i>Главная</span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-all duration-300"></div>
-                        <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full transition-all duration-500"></div>
                     </a>
                     <a href="#about" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl">
                         <span class="relative z-10 text-white font-semibold group-hover:text-blue-100 transition-colors duration-300"><i class="fas fa-tv mr-2"></i>О канале</span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-cyan-500/0 group-hover:from-blue-500/20 group-hover:to-cyan-500/20 transition-all duration-300"></div>
-                        <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 group-hover:w-full transition-all duration-500"></div>
                     </a>
                     <a onclick="openSchedulePage()" href="#" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl cursor-pointer">
                         <span class="relative z-10 text-white font-semibold group-hover:text-green-100 transition-colors duration-300"><i class="fas fa-calendar-alt mr-2"></i>Расписание</span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-green-500/0 to-emerald-500/0 group-hover:from-green-500/20 group-hover:to-emerald-500/20 transition-all duration-300"></div>
-                        <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-400 to-emerald-400 group-hover:w-full transition-all duration-500"></div>
                     </a>
                     <a href="#contact" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl">
                         <span class="relative z-10 text-white font-semibold group-hover:text-orange-100 transition-colors duration-300"><i class="fas fa-comments mr-2"></i>Контакты</span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-orange-500/0 to-red-500/0 group-hover:from-orange-500/20 group-hover:to-red-500/20 transition-all duration-300"></div>
-                        <div class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-400 to-red-400 group-hover:w-full transition-all duration-500"></div>
                     </a>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="lg:hidden">
-                    <button onclick="toggleMobileMenu()" class="mobile-menu-btn p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-300">
-                        <div class="hamburger">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </button>
                 </div>
             </div>
         </nav>
-
-        <!-- Mobile Menu -->
-        <div id="mobileMenu" class="mobile-menu lg:hidden absolute top-full left-0 right-0 z-20 backdrop-blur-md bg-black/50 border-b border-white/20 transform -translate-y-full opacity-0 transition-all duration-500">
-            <div class="p-6 space-y-4">
-                <a href="#home" class="mobile-menu-item block text-white hover:text-purple-300 font-semibold py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-300">
-                    <i class="fas fa-home mr-2"></i>Главная
-                </a>
-                <a href="#about" class="mobile-menu-item block text-white hover:text-blue-300 font-semibold py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-300">
-                    <i class="fas fa-tv mr-2"></i>О канале
-                </a>
-                <a onclick="openSchedulePage()" href="#" class="mobile-menu-item block text-white hover:text-green-300 font-semibold py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-300 cursor-pointer">
-                    <i class="fas fa-calendar-alt mr-2"></i>Расписание
-                </a>
-                <a href="#contact" class="mobile-menu-item block text-white hover:text-orange-300 font-semibold py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-300">
-                    <i class="fas fa-comments mr-2"></i>Контакты
-                </a>
-            </div>
-        </div>
     </header>
 
     <!-- Hero Section -->
     <section id="home" class="min-h-screen flex items-center justify-center relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900"></div>
         <div class="relative z-10 text-center max-w-4xl mx-auto px-6">
-            <img src="https://imgur.com/a/fE9x4NJ" 
+            <img src="wNouL6HINHnQ9QyTaC4Jx" 
                  alt="LiveNet Logo" 
                  class="w-48 h-48 mx-auto mb-8 shadow-2xl rounded-full object-cover">
             <h2 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -542,11 +281,9 @@
         <div class="max-w-6xl mx-auto px-6">
             <h3 class="text-4xl font-bold text-center mb-16">О телеканале</h3>
             <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <img src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                         alt="Телестудия" 
-                         class="rounded-xl shadow-2xl hover-lift">
-                </div>
+                <img src="LLbOGvbkpbNZM5NPwOcRo" 
+                     alt="Студия LiveNet" 
+                     class="rounded-xl shadow-2xl hover-lift w-full h-64 object-cover">
                 <div class="space-y-6">
                     <h4 class="text-3xl font-semibold text-purple-400">LiveNet представляет:</h4>
                     <div class="space-y-4">
@@ -564,7 +301,6 @@
                                 <p class="text-gray-400">Развлекательные и познавательные программы</p>
                             </div>
                         </div>
-
                         <div class="flex items-start space-x-4">
                             <i class="fas fa-comments text-2xl text-green-400"></i>
                             <div>
@@ -577,8 +313,6 @@
             </div>
         </div>
     </section>
-
-
 
     <!-- Stats Section -->
     <section class="py-20 bg-gray-800">
@@ -799,7 +533,7 @@
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-green-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-green-300 font-mono text-lg font-bold">14:40 – 15:00</span>
-                            <span class="text-gray-200 flex items-center"><span class="mr-2">☕️</span>Тачки (часть 1)</span>
+                            <span class="text-gray-200 flex items-center"><span class="mr-2">🎬</span>Тачки (часть 1)</span>
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-green-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-green-300 font-mono text-lg font-bold">15:00 – 16:00</span>
@@ -811,11 +545,11 @@
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-green-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-green-300 font-mono text-lg font-bold">17:00 – 18:00</span>
-                            <span class="text-gray-200 flex items-center"><span class="mr-2">🎬</span>Фильм «Пираты Карибского моря: Проклятие Черной жемчужины» — часть 1</span>
+                            <span class="text-gray-200 flex items-center"><span class="mr-2">🎬</span>Фильм «Пираты Карибского моря» — часть 1</span>
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-green-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-green-300 font-mono text-lg font-bold">18:00 – 19:00</span>
-                            <span class="text-gray-200 flex items-center"><span class="mr-2">🎬</span>Фильм «Пираты Карибского моря: Проклятие Черной жемчужины» — часть 2</span>
+                            <span class="text-gray-200 flex items-center"><span class="mr-2">🎬</span>Фильм «Пираты Карибского моря» — часть 2</span>
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-green-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-green-300 font-mono text-lg font-bold">19:00 – 20:00</span>
@@ -823,7 +557,7 @@
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-green-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-green-300 font-mono text-lg font-bold">20:00 – 21:00</span>
-                            <span class="text-gray-200 flex items-center"><span class="mr-2">🐧</span>Тачки (часть 2)</span>
+                            <span class="text-gray-200 flex items-center"><span class="mr-2">🎬</span>Тачки (часть 2)</span>
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-green-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-green-300 font-mono text-lg font-bold">21:00 – 22:00</span>
@@ -855,7 +589,7 @@
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-orange-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-orange-300 font-mono text-lg font-bold">15:00 – 16:00</span>
-                            <span class="text-gray-200 flex items-center"><span class="mr-2">📺</span>Графити Фолз</span>
+                            <span class="text-gray-200 flex items-center"><span class="mr-2">📺</span>Гравити Фолз</span>
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-orange-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-orange-300 font-mono text-lg font-bold">16:00 – 17:00</span>
@@ -967,7 +701,7 @@
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-violet-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-violet-300 font-mono text-lg font-bold">15:00 – 16:00</span>
-                            <span class="text-gray-200 flex items-center"><span class="mr-2">📺</span>Маша и Ведмедь</span>
+                            <span class="text-gray-200 flex items-center"><span class="mr-2">📺</span>Маша и Медведь</span>
                         </div>
                         <div class="flex justify-between items-center py-3 px-4 bg-gray-800/50 rounded-lg border-l-4 border-violet-400 hover:bg-gray-700/50 transition-all">
                             <span class="text-violet-300 font-mono text-lg font-bold">16:00 – 17:00</span>
@@ -1070,9 +804,9 @@
                         <i class="fas fa-calendar-alt mr-2"></i>Расписание может изменяться. Следите за анонсами в соц.сетях!
                     </p>
                     <div class="flex justify-center items-center space-x-4">
-                        <i class="fas fa-tv text-purple-400 text-2xl animate-bounce"></i>
+                        <span class="text-purple-400 text-2xl animate-bounce">📺</span>
                         <span class="text-pink-400 text-lg font-semibold">LiveNet — Ваш любимый канал!</span>
-                        <i class="fas fa-star text-purple-400 text-2xl animate-bounce" style="animation-delay: 0.5s;"></i>
+                        <span class="text-purple-400 text-2xl animate-bounce" style="animation-delay: 0.5s;">✨</span>
                     </div>
                 </div>
             </div>
@@ -1100,7 +834,7 @@
                 <!-- Video Player -->
                 <div class="relative rounded-lg overflow-hidden bg-black">
                     <iframe 
-                        src="https://player.twitch.tv/?channel=livenet_&parent=hatchcanvas.com&parent=hatch.so&parent=localhost&autoplay=true&muted=false"
+                        src="https://player.twitch.tv/?channel=livenet_&parent=vasilyhto56-dev.github.io&parent=hatchcanvas.com&parent=hatch.so&parent=localhost&autoplay=true&muted=false"
                         class="w-full aspect-video"
                         frameborder="0"
                         allowfullscreen="true"
@@ -1141,8 +875,6 @@
                 </a>
             </div>
 
-
-
             <!-- Footer -->
             <div class="mt-8 text-center">
                 <p class="text-gray-400 text-sm">© 2025 LiveNet. Все права защищены.</p>
@@ -1150,7 +882,7 @@
         </div>
     </div>
 
-    <script type="module">
+    <script>
         // Открыть страницу стрима
         function openLiveStream() {
             document.getElementById('liveStreamPage').classList.remove('hidden');
@@ -1163,9 +895,17 @@
             document.body.style.overflow = 'auto';
         }
 
+        // Открыть страницу расписания
+        function openSchedulePage() {
+            document.getElementById('schedulePage').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
 
-
-
+        // Закрыть страницу расписания
+        function closeSchedulePage() {
+            document.getElementById('schedulePage').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
 
         // Анимация счетчиков
         function animateCounter(element, target) {
@@ -1185,16 +925,6 @@
         window.addEventListener('load', () => {
             animateCounter(document.getElementById('followers'), 13);
             animateCounter(document.getElementById('viewers'), Math.floor(Math.random() * 5) + 1);
-            
-            // Footer counters with delay
-            setTimeout(() => {
-                if (document.getElementById('footer-followers')) {
-                    animateCounter(document.getElementById('footer-followers'), 13);
-                }
-                if (document.getElementById('footer-viewers')) {
-                    animateCounter(document.getElementById('footer-viewers'), Math.floor(Math.random() * 5) + 1);
-                }
-            }, 1000);
         });
 
         // Плавная прокрутка
@@ -1211,91 +941,11 @@
             });
         });
 
-        // Эффект параллакса для hero секции
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * -0.5;
-            const hero = document.querySelector('#home');
-            if (hero) {
-                hero.style.transform = `translateY(${rate}px)`;
-            }
-        });
-
-        // Открыть страницу расписания
-        function openSchedulePage() {
-            document.getElementById('schedulePage').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Закрыть страницу расписания
-        function closeSchedulePage() {
-            document.getElementById('schedulePage').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Mobile Menu Toggle
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-            
-            mobileMenu.classList.toggle('active');
-            menuBtn.classList.toggle('active');
-            
-            if (mobileMenu.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        // Close mobile menu when clicking on menu items
-        document.querySelectorAll('.mobile-menu-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const mobileMenu = document.getElementById('mobileMenu');
-                const menuBtn = document.querySelector('.mobile-menu-btn');
-                
-                mobileMenu.classList.remove('active');
-                menuBtn.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            });
-        });
-
-        // Enhanced scroll effects for header
-        let lastScrollTop = 0;
-        window.addEventListener('scroll', () => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const header = document.querySelector('header');
-            
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down
-                header.style.transform = 'translateY(-100%)';
-            } else {
-                // Scrolling up
-                header.style.transform = 'translateY(0)';
-            }
-            
-            // Add backdrop blur effect based on scroll
-            const nav = header.querySelector('nav');
-            if (scrollTop > 50) {
-                nav.style.backdropFilter = 'blur(30px)';
-                nav.style.background = 'rgba(0, 0, 0, 0.3)';
-            } else {
-                nav.style.backdropFilter = 'blur(20px)';
-                nav.style.background = 'rgba(255, 255, 255, 0.1)';
-            }
-            
-            lastScrollTop = scrollTop;
-        });
-
-        // Add header transition
-        document.querySelector('header').style.transition = 'transform 0.3s ease-in-out';
-
         // Глобальные функции для HTML
         window.openLiveStream = openLiveStream;
         window.closeLiveStream = closeLiveStream;
         window.openSchedulePage = openSchedulePage;
         window.closeSchedulePage = closeSchedulePage;
-        window.toggleMobileMenu = toggleMobileMenu;
     </script>
 </body>
 </html>
