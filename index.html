@@ -6,6 +6,7 @@
     <title>LiveNet - Онлайн Телеканал</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
@@ -221,16 +222,16 @@
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex space-x-8">
                     <a href="#home" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl">
-                        <span class="relative z-10 text-white font-semibold group-hover:text-purple-100 transition-colors duration-300">🏠 Главная</span>
+                        <span class="relative z-10 text-white font-semibold group-hover:text-purple-100 transition-colors duration-300"><i class="fas fa-home mr-2"></i>Главная</span>
                     </a>
                     <a href="#about" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl">
-                        <span class="relative z-10 text-white font-semibold group-hover:text-blue-100 transition-colors duration-300">📺 О канале</span>
+                        <span class="relative z-10 text-white font-semibold group-hover:text-blue-100 transition-colors duration-300"><i class="fas fa-tv mr-2"></i>О канале</span>
                     </a>
                     <a onclick="openSchedulePage()" href="#" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl cursor-pointer">
-                        <span class="relative z-10 text-white font-semibold group-hover:text-green-100 transition-colors duration-300">📅 Расписание</span>
+                        <span class="relative z-10 text-white font-semibold group-hover:text-green-100 transition-colors duration-300"><i class="fas fa-calendar-alt mr-2"></i>Расписание</span>
                     </a>
                     <a href="#contact" class="menu-item group relative overflow-hidden px-4 py-2 rounded-xl">
-                        <span class="relative z-10 text-white font-semibold group-hover:text-orange-100 transition-colors duration-300">💬 Контакты</span>
+                        <span class="relative z-10 text-white font-semibold group-hover:text-orange-100 transition-colors duration-300"><i class="fas fa-comments mr-2"></i>Контакты</span>
                     </a>
                 </div>
             </div>
@@ -258,7 +259,7 @@
                    class="hero-btn group relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 hover:from-purple-500 hover:via-pink-400 hover:to-red-400 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-purple-500/25 inline-flex items-center justify-center">
                     <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative flex items-center space-x-2">
-                        <span class="text-2xl animate-pulse">📺</span>
+                        <i class="fas fa-play-circle text-2xl animate-pulse mr-2"></i>
                         <span>Смотреть прямой эфир</span>
                     </div>
                 </button>
@@ -266,7 +267,7 @@
                    class="hero-btn-outline group relative overflow-hidden border-2 border-transparent bg-gradient-to-r from-blue-500 to-cyan-400 p-0.5 rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105">
                     <div class="bg-gray-900 hover:bg-gradient-to-r hover:from-blue-900/50 hover:to-cyan-900/50 px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 relative z-10">
                         <div class="flex items-center space-x-2">
-                            <span class="text-2xl">📅</span>
+                            <i class="fas fa-calendar-check text-2xl mr-2"></i>
                             <span class="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent group-hover:from-white group-hover:to-white transition-all duration-300">Программа передач</span>
                         </div>
                     </div>
@@ -287,21 +288,21 @@
                     <h4 class="text-3xl font-semibold text-purple-400">LiveNet представляет:</h4>
                     <div class="space-y-4">
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl">🎬</span>
+                            <i class="fas fa-film text-2xl text-purple-400"></i>
                             <div>
                                 <h5 class="font-semibold text-lg">Фильмы и сериалы</h5>
                                 <p class="text-gray-400">Лучшие киноновинки и классика кино</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl">📺</span>
+                            <i class="fas fa-tv text-2xl text-blue-400"></i>
                             <div>
                                 <h5 class="font-semibold text-lg">Телепередачи</h5>
                                 <p class="text-gray-400">Развлекательные и познавательные программы</p>
                             </div>
                         </div>
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl">💬</span>
+                            <i class="fas fa-comments text-2xl text-green-400"></i>
                             <div>
                                 <h5 class="font-semibold text-lg">Интерактив с зрителями</h5>
                                 <p class="text-gray-400">Общение в чате во время просмотра</p>
@@ -339,7 +340,7 @@
                    class="social-btn group relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 hover:from-blue-400 hover:via-blue-500 hover:to-indigo-600 p-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:-rotate-1 shadow-xl hover:shadow-blue-500/30">
                     <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
                     <div class="relative z-10 text-center">
-                        <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">✈️</div>
+                        <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300"><i class="fab fa-telegram-plane"></i></div>
                         <p class="font-bold text-xl text-white">Telegram</p>
                         <div class="h-1 bg-gradient-to-r from-transparent via-white/50 to-transparent mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
@@ -348,7 +349,7 @@
                    class="social-btn group relative overflow-hidden bg-gradient-to-br from-gray-800 via-black to-gray-900 hover:from-gray-700 hover:via-gray-800 hover:to-black p-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:rotate-1 shadow-xl hover:shadow-gray-700/30">
                     <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
                     <div class="relative z-10 text-center">
-                        <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">📱</div>
+                        <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300"><i class="fab fa-tiktok"></i></div>
                         <p class="font-bold text-xl text-white">TikTok</p>
                         <div class="h-1 bg-gradient-to-r from-transparent via-pink-400 to-transparent mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
@@ -357,7 +358,7 @@
                    class="social-btn group relative overflow-hidden bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 hover:from-green-400 hover:via-emerald-500 hover:to-teal-600 p-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:-rotate-1 shadow-xl hover:shadow-green-500/30">
                     <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
                     <div class="relative z-10 text-center">
-                        <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">💎</div>
+                        <div class="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300"><i class="fas fa-gem"></i></div>
                         <p class="font-bold text-xl text-white">Донат</p>
                         <div class="h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
@@ -378,7 +379,7 @@
     <div id="schedulePage" class="fixed inset-0 bg-gray-900 z-50 hidden">
         <!-- Header -->
         <div class="bg-gray-800 p-4 flex justify-center items-center border-b border-purple-500 relative">
-            <h1 class="text-2xl font-bold text-white">📅 Программа передач</h1>
+            <h1 class="text-2xl font-bold text-white"><i class="fas fa-calendar-alt mr-2"></i>Программа передач</h1>
             <button onclick="closeSchedulePage()" class="absolute right-4 text-gray-400 hover:text-white text-3xl font-bold">×</button>
         </div>
 
@@ -800,7 +801,7 @@
                 <!-- Footer -->
                 <div class="text-center mb-8 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 p-8 rounded-2xl shadow-xl">
                     <p class="text-gray-300 text-lg mb-4">
-                        📅 Расписание может изменяться. Следите за анонсами в соц.сетях!
+                        <i class="fas fa-calendar-alt mr-2"></i>Расписание может изменяться. Следите за анонсами в соц.сетях!
                     </p>
                     <div class="flex justify-center items-center space-x-4">
                         <span class="text-purple-400 text-2xl animate-bounce">📺</span>
@@ -816,7 +817,7 @@
     <div id="liveStreamPage" class="fixed inset-0 bg-gray-900 z-50 hidden">
         <!-- Header -->
         <div class="bg-gray-800 p-4 flex justify-center items-center border-b border-purple-500 relative">
-            <h1 class="text-2xl font-bold text-white">📡 LiveNet — Выдуманный телеканал</h1>
+            <h1 class="text-2xl font-bold text-white"><i class="fas fa-broadcast-tower mr-2"></i>LiveNet — Выдуманный телеканал</h1>
             <button onclick="closeLiveStream()" class="absolute right-4 text-gray-400 hover:text-white text-3xl font-bold">×</button>
         </div>
 
@@ -827,7 +828,7 @@
             <div class="relative w-full max-w-5xl">
                 <!-- Video Title Above Player -->
                 <div class="mb-4 text-center">
-                    <h2 class="text-2xl font-bold text-purple-400">🔴 Эфир телеканала</h2>
+                    <h2 class="text-2xl font-bold text-purple-400"><i class="fas fa-circle text-red-500 mr-2 animate-pulse"></i>Эфир телеканала</h2>
                 </div>
                 
                 <!-- Video Player -->
@@ -850,7 +851,7 @@
                    class="stream-btn group relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-400 hover:via-blue-500 hover:to-indigo-500 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-blue-500/40 border-2 border-blue-400/30 hover:border-blue-300/50">
                     <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                     <div class="relative flex items-center space-x-3">
-                        <span class="text-2xl animate-bounce">✈️</span>
+                        <i class="fab fa-telegram-plane text-2xl animate-bounce mr-2"></i>
                         <span class="text-lg font-black">Telegram</span>
                     </div>
                 </a>
@@ -859,7 +860,7 @@
                    class="stream-btn group relative overflow-hidden bg-gradient-to-r from-gray-800 via-black to-gray-900 hover:from-gray-700 hover:via-gray-800 hover:to-black text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-pink-500/40 border-2 border-gray-600/30 hover:border-pink-400/50">
                     <div class="absolute inset-0 bg-gradient-to-r from-pink-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                     <div class="relative flex items-center space-x-3">
-                        <span class="text-2xl animate-pulse">📱</span>
+                        <i class="fab fa-tiktok text-2xl animate-pulse mr-2"></i>
                         <span class="text-lg font-black">TikTok</span>
                     </div>
                 </a>
@@ -868,7 +869,7 @@
                    class="stream-btn group relative overflow-hidden bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-400 hover:via-emerald-500 hover:to-teal-500 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-green-500/40 border-2 border-green-400/30 hover:border-yellow-300/50">
                     <div class="absolute inset-0 bg-gradient-to-r from-yellow-200/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                     <div class="relative flex items-center space-x-3">
-                        <span class="text-2xl animate-spin" style="animation-duration: 2s;">💎</span>
+                        <i class="fas fa-gem text-2xl animate-spin mr-2" style="animation-duration: 2s;"></i>
                         <span class="text-lg font-black">Донат</span>
                     </div>
                 </a>
