@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 LiveNet — Выдуманный телеканал</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Loading Animation */
+        @keyframes progressFill {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* Button Click Animation */
+        .btn-click {
+            animation: btnPulse 0.6s ease-out !important;
+        }
+
+        @keyframes btnPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
+        }
+
+        /* Light Theme */
+        .light-theme {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+            color: #1a202c !important;
+        }
+
+        .light-theme .bg-gray-900 {
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%) !important;
+            color: #2d3748 !important;
+        }
+
+        .light-theme .text-white {
+            color: #2d3748 !important;
+        }
+
+        .light-theme .text-gray-300 {
+            color: #4a5568 !important;
+        }
+
+        .light-theme .bg-black {
+            background-color: #ffffff !important;
+        }
+
+        .light-theme .text-purple-400 {
+            color: #7c3aed !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-['Inter']">
+    <!-- Loading Animation -->
+    <div id="pageLoader" class="fixed inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-black z-50 flex items-center justify-center transition-all duration-1000">
+        <div class="text-center">
+            <div class="relative">
+                <div class="w-24 h-24 border-4 border-purple-500/20 border-t-purple-400 rounded-full animate-spin mb-6 mx-auto"></div>
+                <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-purple-600 rounded-full animate-pulse opacity-60"></div>
+                <div class="absolute -top-4 -left-4 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                <div class="absolute -top-2 -right-6 w-1.5 h-1.5 bg-purple-300 rounded-full animate-bounce" style="animation-delay: 0.3s;"></div>
+                <div class="absolute -bottom-4 -right-2 w-2 h-2 bg-pink-400 rounded-full animate-bounce" style="animation-delay: 0.5s;"></div>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2 animate-pulse">LiveNet</h2>
+            <p class="text-purple-300 animate-pulse" style="animation-delay: 0.2s;">Загрузка контента...</p>
+            <div class="w-48 h-1 bg-gray-700 rounded-full mx-auto mt-4 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse" style="width: 0%; animation: progressFill 2s ease-in-out forwards;"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Main Content -->
+    <div class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800">
+        <!-- Hero Section -->
+        <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 bg-black/30"></div>
+            
+            <div class="relative text-center z-10 px-4 max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-6xl md:text-7xl lg:text-8xl font-black mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-pulse">
+                        LiveNet
+                    </h1>
+                    <p class="text-xl md:text-2xl text-gray-300 mb-8 font-light">
+                        Выдуманный телеканал для настоящих фанатов
+                    </p>
+                </div>
+                
+                <!-- Live Stats -->
+                <div class="flex justify-center space-x-8 mb-12">
+                    <div class="text-center group">
+                        <div class="text-3xl font-bold text-purple-400 group-hover:scale-110 transition-transform duration-300">
+                            <span id="followers">0</span>
+                        </div>
+                        <div class="text-gray-400 text-sm">Подписчики</div>
+                    </div>
+                    <div class="text-center group">
+                        <div class="text-3xl font-bold text-pink-400 group-hover:scale-110 transition-transform duration-300">
+                            <span id="viewers">0</span>
+                        </div>
+                        <div class="text-gray-400 text-sm">Зрители</div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="space-y-4 max-w-md mx-auto">
+                    <button onclick="openLiveStream()" class="group relative overflow-hidden bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 hover:from-red-400 hover:via-pink-400 hover:to-purple-500 text-white font-bold text-xl px-12 py-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-red-500/40 border-2 border-red-400/30 hover:border-red-300/50 w-full">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                        <div class="relative flex items-center justify-center space-x-3">
+                            <i class="fas fa-play text-2xl animate-pulse"></i>
+                            <span class="font-black">СМОТРЕТЬ СТРИМ</span>
+                        </div>
+                    </button>
+                    
+                    <button onclick="window.open('https://t.me/livenet_official', '_blank')" class="group relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-400 hover:via-blue-500 hover:to-indigo-500 text-white font-bold text-xl px-12 py-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-blue-500/40 border-2 border-blue-400/30 hover:border-blue-300/50 w-full">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                        <div class="relative flex items-center justify-center space-x-3">
+                            <i class="fas fa-calendar-alt text-2xl"></i>
+                            <span class="font-black">ПРОГРАММА ПЕРЕДАЧ</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Live Stream Page -->
+    <div id="liveStreamPage" class="hidden fixed inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-black z-50 overflow-y-auto">
+        <div class="container mx-auto px-4 py-8">
+            <!-- Close Button -->
+            <button onclick="closeLiveStream()" class="fixed top-4 left-4 z-50 bg-red-500 hover:bg-red-400 text-white p-3 rounded-full transition-all duration-300 transform hover:scale-110 shadow-lg">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            
+            <!-- Stream Header -->
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-purple-400">
+                    <i class="fas fa-circle text-red-500 mr-2 animate-pulse"></i>Эфир телеканала
+                </h2>
+            </div>
+            
+            <!-- Video Player -->
+            <div class="relative rounded-lg overflow-hidden bg-black">
+                <div id="twitch-player" class="w-full aspect-video"></div>
+                <script src="https://player.twitch.tv/js/embed/v1.js"></script>
+                <script type="text/javascript">
+                    var options = {
+                        width: "100%",
+                        height: "480",
+                        channel: "livenet_",
+                        parent: ["vasiliysh056-dev.github.io", "github.io"]
+                    };
+                    var player = new Twitch.Player("twitch-player", options);
+                    player.setVolume(0.5);
+                </script>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="mt-8 flex flex-wrap justify-center gap-6">
+                <!-- Telegram -->
+                <a href="https://t.me/livenet_official" target="_blank"
+                   class="stream-btn group relative overflow-hidden bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-400 hover:via-blue-500 hover:to-indigo-500 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-blue-500/40 border-2 border-blue-400/30 hover:border-blue-300/50">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                    <div class="relative flex items-center space-x-3">
+                        <i class="fab fa-telegram-plane text-2xl animate-bounce mr-2"></i>
+                        <span class="text-lg font-black">Telegram</span>
+                    </div>
+                </a>
+                
+                <!-- TikTok -->
+                <a href="https://www.tiktok.com/@tokxyo.exe" target="_blank"
+                   class="stream-btn group relative overflow-hidden bg-gradient-to-r from-gray-800 via-black to-gray-900 hover:from-gray-700 hover:via-gray-800 hover:to-black text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-pink-500/40 border-2 border-gray-600/30 hover:border-pink-400/50">
+                    <div class="absolute inset-0 bg-gradient-to-r from-pink-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                    <div class="relative flex items-center space-x-3">
+                        <i class="fab fa-tiktok text-2xl animate-pulse mr-2"></i>
+                        <span class="text-lg font-black">TikTok</span>
+                    </div>
+                </a>
+                
+                <!-- Донат -->
+                <a href="https://www.donationalerts.com/r/livenet" target="_blank"
+                   class="stream-btn group relative overflow-hidden bg-gradient-to-r from-green-500 via-emerald-600 to-teal-600 hover:from-green-400 hover:via-emerald-500 hover:to-teal-500 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-green-500/40 border-2 border-green-400/30 hover:border-yellow-300/50">
+                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-200/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                    <div class="relative flex items-center space-x-3">
+                        <i class="fas fa-gem text-2xl animate-spin mr-2" style="animation-duration: 2s;"></i>
+                        <span class="text-lg font-black">Донат</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black/20 py-4">
+        <div class="text-center">
+            <p class="text-gray-400 text-sm">© 2025 LiveNet. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        // Hide loader after page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 500);
+                }
+            }, 1500);
+        });
+
+
+
+        // Button animations
+        document.querySelectorAll('button, .stream-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.add('btn-click');
+                setTimeout(() => {
+                    btn.classList.remove('btn-click');
+                }, 600);
+            });
+        });
+
+        // Live Stream Functions
+        function openLiveStream() {
+            document.getElementById('liveStreamPage').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLiveStream() {
+            document.getElementById('liveStreamPage').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Counter Animation
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 20);
+        }
+
+        // Start animations
+        window.addEventListener('load', () => {
+            animateCounter(document.getElementById('followers'), 13);
+            animateCounter(document.getElementById('viewers'), Math.floor(Math.random() * 5) + 1);
+        });
+
+        // Global functions
+        window.openLiveStream = openLiveStream;
+        window.closeLiveStream = closeLiveStream;
+    </script>
+</body>
+</html>
