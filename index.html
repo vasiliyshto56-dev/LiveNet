@@ -452,7 +452,7 @@
                         <a href="#about" class="menu-item nav-link text-white hover:text-purple-400 transition-colors duration-300 font-medium">
                             <i class="fas fa-info-circle mr-2"></i>О канале
                         </a>
-                        <button onclick="openSchedulePage()" class="menu-item nav-link text-white hover:text-purple-400 transition-colors duration-300 font-medium">
+                        <button onclick="window.open('https://t.me/livenet_official', '_blank')" class="menu-item nav-link text-white hover:text-purple-400 transition-colors duration-300 font-medium">
                             <i class="fas fa-calendar-alt mr-2"></i>Программа
                         </button>
                         <a href="#contact" class="menu-item nav-link text-white hover:text-purple-400 transition-colors duration-300 font-medium">
@@ -516,7 +516,7 @@
                         <span>Смотреть прямой эфир</span>
                     </div>
                 </button>
-                <button onclick="openSchedulePage()" 
+                <button onclick="window.open('https://t.me/livenet_official', '_blank')" 
                    class="hero-btn-outline group relative overflow-hidden border-2 border-transparent bg-gradient-to-r from-blue-500 to-cyan-400 p-0.5 rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105">
                     <div class="bg-gray-900 hover:bg-gradient-to-r hover:from-blue-900/50 hover:to-cyan-900/50 px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 relative z-10">
                         <div class="flex items-center space-x-2">
@@ -1074,14 +1074,18 @@
                 
                 <!-- Video Player -->
                 <div class="relative rounded-lg overflow-hidden bg-black">
-                    <iframe 
-                        src="https://www.twitch.tv/mazellovvv&parent=vasiliysh056-dev.github.io&parent=github.io&parent=hatchcanvas.com&parent=hatch.so&parent=localhost&autoplay=true&muted=false"
-                        class="w-full aspect-video"
-                        frameborder="0"
-                        allowfullscreen="true"
-                        scrolling="no"
-                        allow="autoplay; fullscreen">
-                    </iframe>
+                    <div id="twitch-player" class="w-full aspect-video"></div>
+                    <script src="https://player.twitch.tv/js/embed/v1.js"></script>
+                    <script type="text/javascript">
+                        var options = {
+                            width: "100%",
+                            height: "480",
+                            channel: "livenet_",
+                            parent: ["vasiliysh056-dev.github.io", "github.io"]
+                        };
+                        var player = new Twitch.Player("twitch-player", options);
+                        player.setVolume(0.5);
+                    </script>
                 </div>
             </div>
 
