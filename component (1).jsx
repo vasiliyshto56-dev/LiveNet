@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Settings, LogOut, MessageCircle, Eye, ThumbsUp, ThumbsDown, ChevronLeft, Maximize, Minimize } from 'lucide-react';
 
-// 📺 Live Stream Player URL: https://your-domain.com/player
+// 📺 Live Stream Player URL: https://www.twitch.tv/livenet_
 // Replace with your actual domain
 
 export default function LiveNet() {
