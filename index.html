@@ -451,5 +451,34 @@
     document.getElementById('streamNameInput').value = state.streamName;
     updateUI();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const supabaseUrl = "https://ТВОЙ_PROJECT_ID.supabase.co";
+  const supabaseKey = "ТВОЙ_PUBLIC_ANON_KEY";
+
+  const supabase = window.supabase.createClient(
+    supabaseUrl,
+    supabaseKey
+  );
+
+  async function loadSettings() {
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    document.getElementById("title").innerText = data.title;
+  }
+
+  loadSettings();
+</script>
 </body>
 </html>
