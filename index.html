@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiveNet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700;900&display=swap');
+    * { font-family: Poppins, system-ui; }
+    .hide { display: none !important; }
+    #scheduleContainer::-webkit-scrollbar { width: 4px; }
+    #scheduleContainer::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white min-h-screen">
+  
+  <div id="homeView">
+    <div class="h-screen flex flex-col items-center justify-center px-8 relative">
+      <button onclick="openPasswordModal()" class="absolute top-6 right-8 text-4xl hover:scale-110 transition">⚙️</button>
+      <h1 class="text-8xl font-black mb-6 text-center bg-gradient-to-r from-pink-400 via-purple-400 to-pink-300 bg-clip-text text-transparent drop-shadow-lg">LiveNet</h1>
+      <p class="text-purple-200 text-xl mb-16 text-center max-w-lg font-light">Выдуманный телеканал для настоящих фанатов</p>
+      
+      <div class="flex gap-4 flex-col w-full max-w-sm items-center">
+        <button onclick="showView('player')" class="px-8 py-4 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold rounded-2xl hover:shadow-2xl hover:shadow-pink-500/60 transition transform hover:scale-105 text-lg shadow-lg w-full">▶ СМОТРЕТЬ СТРИМ</button>
+        <a href="https://t.me/livenet_official" target="_blank" class="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-2xl hover:shadow-2xl hover:shadow-blue-500/60 transition transform hover:scale-105 text-center text-lg flex items-center justify-center gap-2 shadow-lg w-full">💬 ТЕЛЕГРАМ КАНАЛ</a>
+      </div>
+
+      <button id="adminPanelBtn" onclick="showView('admin')" class="mt-8 px-6 py-2 bg-gradient-to-r from-purple-700 to-pink-700 text-white text-sm rounded-lg shadow-md font-semibold hide">
+        Панель администратора
+      </button>
+
+      <div class="absolute bottom-0 w-full text-center py-6 text-purple-300/70 text-sm border-t border-purple-700/50">© 2026 LiveNet.</div>
+    </div>
+  </div>
+
+  <div id="playerView" class="hide h-screen flex flex-col overflow-hidden">
+    <div class="px-6 py-4 border-b border-purple-700/50">
+      <button onclick="showView('home')" class="text-purple-300 hover:text-white transition">◄ Назад</button>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden gap-4 p-4">
+      <div class="flex-1 bg-purple-950 rounded-2xl border-2 border-blue-400 overflow-hidden relative flex items-center justify-center shadow-2xl">
+        <div id="connectingState" class="hide absolute inset-0 bg-purple-950/90 z-30 flex items-center justify-center font-bold text-pink-400 animate-pulse text-2xl">Подключение...</div>
+        <div id="offlineState" class="hide absolute inset-0 bg-purple-950/95 z-30 flex flex-col items-center justify-center text-center">
+          <div class="text-8xl mb-4">😢</div>
+          <h2 class="text-3xl font-bold text-pink-400">Мы не в эфире :(</h2>
+        </div>
+        <div id="liveState" class="w-full h-full flex items-center justify-center">
+          <iframe id="streamIframe" class="w-full h-full hide" src="https://www.youtube.com/embed/live_stream?channel=ID" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          <div id="playButton" class="w-32 h-32 bg-pink-500/20 rounded-full flex items-center justify-center border-2 border-pink-400/50 cursor-pointer hover:scale-110 transition" onclick="handlePlayButtonClick()">
+            <span class="text-7xl">▶</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-72 bg-purple-900/50 border border-purple-700/50 rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+        <div class="p-4 border-b border-purple-700/50">
+          <div class="flex items-center gap-2 mb-2">
+            <div id="statusDot" class="w-2 h-2 bg-gray-500 rounded-full"></div>
+            <p id="statusText" class="text-xs font-bold text-gray-400">ВНЕ ЭФИРА</p>
+          </div>
+          <h2 id="streamNameDisplay" class="text-lg font-bold text-white mb-2">Загрузка...</h2>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4" id="scheduleContainer">
+          <h3 class="font-bold text-sm mb-3 text-purple-300 uppercase tracking-wider">Расписание</h3>
+          <div id="scheduleList" class="space-y-2 text-sm"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminView" class="hide min-h-screen p-8 bg-purple-900">
+    <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
+      <h1 class="text-4xl font-bold">Панель управления</h1>
+      <div class="flex gap-3">
+        <button onclick="showView('home')" class="px-6 py-2 bg-purple-700 hover:bg-purple-600 rounded-lg font-bold transition">◄ В меню</button>
+        <button onclick="adminLogout()" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-bold transition">Выйти из аккаунта</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+      <div class="bg-purple-800/50 p-6 rounded-2xl border border-purple-700/50">
+        <h2 class="text-2xl font-bold mb-6 text-pink-400">Трансляция</h2>
+        <button onclick="toggleLive()" id="liveToggleBtn" class="w-full py-4 rounded-xl font-bold text-lg mb-6 shadow-lg transition">ГРУЗИМ...</button>
+        
+        <label class="block text-sm text-purple-300 mb-2">Название стрима:</label>
+        <input type="text" id="streamNameInput" class="w-full bg-purple-950 border border-purple-700 rounded-lg px-4 py-3 mb-4 focus:border-pink-500 outline-none">
+        <button onclick="saveSettings()" class="w-full py-3 bg-pink-600 hover:bg-pink-500 rounded-lg font-bold transition shadow-lg">💾 Сохранить настройки</button>
+      </div>
+
+      <div class="bg-purple-800/50 p-6 rounded-2xl border border-purple-700/50">
+        <h2 class="text-2xl font-bold mb-4 text-pink-400">Расписание эфира</h2>
+        <textarea id="scheduleTextarea" class="w-full bg-purple-950 border border-purple-700 rounded-lg px-4 py-4 h-64 resize-none focus:border-pink-500 outline-none text-sm" placeholder="12:00 - Утреннее шоу&#10;15:00 - Новости"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div id="passwordModal" class="hide fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+    <div class="bg-purple-900 p-8 rounded-3xl border border-pink-500/50 w-full max-w-sm shadow-2xl">
+      <h2 class="text-2xl font-bold mb-6 text-center text-pink-400">Вход для своих</h2>
+      <input type="password" id="passwordInput" class="w-full bg-purple-800 border border-purple-700 rounded-xl px-4 py-4 mb-6 text-white text-center text-xl outline-none focus:border-pink-500" placeholder="••••••••">
+      <div class="flex gap-3">
+        <button onclick="loginAdmin()" class="flex-1 bg-pink-600 py-3 rounded-xl font-bold hover:bg-pink-500 transition">Войти</button>
+        <button onclick="document.getElementById('passwordModal').classList.add('hide')" class="flex-1 bg-purple-800 py-3 rounded-xl font-bold transition">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://mqcakdxhkwugckvuqygs.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_h-EbNY3-ziEUt_i4PmQ1gw_cmzSR2OH";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let state = {
+      isLive: false,
+      streamName: 'Прямой эфир',
+      schedule: '',
+      isAdmin: sessionStorage.getItem('isLiveNetAdmin') === 'true' // Проверка сохранения админки
+    };
+
+    async function loadFromDB() {
+      const { data, error } = await supabaseClient.from('site_settings').select('*').single();
+      if (!error && data) {
+        state.isLive = data.is_live;
+        state.streamName = data.stream_name;
+        state.schedule = data.schedule;
+        updateUI();
+      }
+    }
+
+    async function saveToDB() {
+      await supabaseClient.from('site_settings').update({ 
+        is_live: state.isLive, 
+        stream_name: state.streamName, 
+        schedule: state.schedule 
+      }).eq('id', 1);
+    }
+
+    function showView(view) {
+      document.getElementById('homeView').classList.toggle('hide', view !== 'home');
+      document.getElementById('playerView').classList.toggle('hide', view !== 'player');
+      document.getElementById('adminView').classList.toggle('hide', view !== 'admin');
+      if (view === 'player') loadFromDB();
+    }
+
+    function updateUI() {
+      // Кнопка в главном меню
+      document.getElementById('adminPanelBtn').classList.toggle('hide', !state.isAdmin);
+
+      // Плеер
+      document.getElementById('streamNameDisplay').textContent = state.streamName;
+      const dot = document.getElementById('statusDot');
+      const txt = document.getElementById('statusText');
+      
+      if (state.isLive) {
+        dot.className = "w-2 h-2 bg-red-500 animate-pulse rounded-full";
+        txt.textContent = "В ЭФИРЕ";
+        txt.className = "text-xs font-bold text-red-400";
+      } else {
+        dot.className = "w-2 h-2 bg-gray-500 rounded-full";
+        txt.textContent = "ВНЕ ЭФИРА";
+        txt.className = "text-xs font-bold text-gray-400";
+        document.getElementById('streamIframe').classList.add('hide');
+        document.getElementById('playButton').classList.remove('hide');
+      }
+
+      // Расписание
+      const list = document.getElementById('scheduleList');
+      const lines = state.schedule.split('\n').filter(l => l.trim());
+      list.innerHTML = lines.length ? lines.map(line => `
+        <div class="bg-purple-800/40 p-3 rounded-lg border border-purple-700/30 text-purple-100">${line}</div>
+      `).join('') : '<p class="text-purple-400">Программа скоро будет...</p>';
+
+      // Кнопки в админке
+      const tgl = document.getElementById('liveToggleBtn');
+      tgl.textContent = state.isLive ? "🔴 ОСТАНОВИТЬ ЭФИР" : "⚪ ЗАПУСТИТЬ ЭФИР";
+      tgl.className = `w-full py-4 rounded-xl font-bold text-lg mb-6 transition shadow-lg ${state.isLive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`;
+      document.getElementById('streamNameInput').value = state.streamName;
+      document.getElementById('scheduleTextarea').value = state.schedule;
+    }
+
+    async function toggleLive() {
+      state.isLive = !state.isLive;
+      updateUI();
+      await saveToDB();
+    }
+
+    async function saveSettings() {
+      state.streamName = document.getElementById('streamNameInput').value;
+      state.schedule = document.getElementById('scheduleTextarea').value;
+      updateUI();
+      await saveToDB();
+      alert("Всё сохранено в базу!");
+    }
+
+    function loginAdmin() {
+      if (document.getElementById('passwordInput').value === '7b06a998-72d8-458d-966') {
+        state.isAdmin = true;
+        sessionStorage.setItem('isLiveNetAdmin', 'true'); // Сохраняем сессию
+        document.getElementById('adminPanelBtn').classList.remove('hide');
+        document.getElementById('passwordModal').classList.add('hide');
+        showView('admin');
+      } else {
+        alert('Пароль не тот!');
+      }
+    }
+
+    function adminLogout() {
+      state.isAdmin = false;
+      sessionStorage.removeItem('isLiveNetAdmin'); // Удаляем сессию
+      document.getElementById('adminPanelBtn').classList.add('hide');
+      showView('home');
+    }
+
+    function handlePlayButtonClick() {
+      if (!state.isLive) {
+        document.getElementById('connectingState').classList.remove('hide');
+        setTimeout(() => {
+          document.getElementById('connectingState').classList.add('hide');
+          document.getElementById('offlineState').classList.remove('hide');
+          setTimeout(() => document.getElementById('offlineState').classList.add('hide'), 3000);
+        }, 1200);
+      } else {
+        document.getElementById('streamIframe').classList.remove('hide');
+        document.getElementById('playButton').classList.add('hide');
+      }
+    }
+
+    function openPasswordModal() {
+      document.getElementById('passwordModal').classList.remove('hide');
+    }
+
+    // Инициализация
+    loadFromDB();
+    setInterval(loadFromDB, 15000); // Проверка базы каждые 15 сек
+  </script>
+</body>
+</html>
