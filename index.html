@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LiveNet</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    .hide { display: none !important; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
+    .banner-img { width: 100%; height: 130px; object-fit: cover; border-radius: 12px; background: #222; margin-bottom: 8px; }
+  </style>
+</head>
+<body class="bg-[#0f0a19] text-white min-h-screen">
+
+  <div id="homeView">
+    <div class="h-screen flex flex-col items-center justify-center px-6 text-center relative">
+      <button onclick="openPasswordModal()" class="absolute top-6 right-8 text-2xl opacity-20 hover:opacity-100 transition">⚙️</button>
+      <h1 class="text-7xl md:text-9xl font-black mb-4 bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent italic">LiveNet</h1>
+      
+      <div class="flex gap-4 flex-col w-full max-w-sm mt-4">
+        <button onclick="showView('player')" class="px-8 py-5 bg-pink-600 text-white font-bold rounded-2xl hover:scale-105 transition shadow-lg text-xl uppercase">▶ СМОТРЕТЬ</button>
+        <a href="https://t.me/livenet_official" target="_blank" class="px-8 py-5 bg-blue-600 text-white font-bold rounded-2xl hover:scale-105 transition shadow-lg text-xl uppercase flex items-center justify-center gap-2">💬 TELEGRAM</a>
+        
+        <button id="homeAdminBtn" onclick="showView('admin')" class="px-8 py-4 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition text-sm uppercase hide border border-white/10 tracking-widest">⚙️ АДМИН ПАНЕЛЬ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="playerView" class="hide min-h-screen flex flex-col">
+    <div class="px-6 py-4 border-b border-white/5 flex items-center bg-[#0f0a19] sticky top-0 z-50">
+      <button onclick="showView('home')" class="font-bold text-2xl text-pink-500 mr-4">◄</button>
+    </div>
+
+    <div class="flex flex-col lg:flex-row p-4 gap-6 max-w-[1400px] mx-auto w-full">
+      <div class="flex-[3] w-full">
+        <div class="bg-black rounded-3xl border border-white/10 overflow-hidden shadow-2xl relative aspect-video flex items-center justify-center">
+            <div id="offlineState" class="hide absolute inset-0 bg-[#0f0a19] z-30 flex flex-col items-center justify-center text-center">
+              <span class="text-6xl mb-4">😢</span>
+              <h2 class="text-xl font-bold text-gray-400">Увы, но мы вне эфира :(</h2>
+            </div>
+            <iframe id="streamIframe" class="w-full h-full hide" src="" frameborder="0" allow="autoplay; fullscreen"></iframe>
+            <div id="playButton" class="w-20 h-20 bg-pink-600 rounded-full flex items-center justify-center cursor-pointer shadow-xl" onclick="handlePlayButtonClick()">
+              <span class="text-4xl ml-1">▶</span>
+            </div>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <div id="statusDot" class="w-2 h-2 bg-gray-600 rounded-full"></div>
+              <p id="statusText" class="text-[10px] font-bold text-gray-500 uppercase">ВНЕ ЭФИРА</p>
+              <div class="ml-2 flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded text-[10px]">👤 <span id="userCount">0</span></div>
+            </div>
+            <h2 id="streamNameDisplay" class="text-2xl font-black uppercase italic tracking-tight italic">ЗАГРУЗКА...</h2>
+          </div>
+        </div>
+
+        <div class="mt-10">
+            <h3 class="text-xs font-bold uppercase text-gray-500 mb-6 tracking-widest">О канале</h3>
+            <div id="bannersContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </div>
+      </div>
+
+      <div class="flex-1">
+        <div class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden flex flex-col h-[450px]">
+          <div class="p-4 border-b border-white/5 bg-white/5 font-bold text-[10px] uppercase tracking-widest text-pink-500 italic">Расписание</div>
+          <div id="scheduleList" class="p-4 space-y-3 overflow-y-auto flex-1 text-sm italic"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminView" class="hide min-h-screen p-6 md:p-12 bg-[#0a0514]">
+    <div class="max-w-xl mx-auto space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <h2 class="text-2xl font-black italic uppercase">Управление</h2>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button onclick="showView('home')" class="flex-1 bg-white/5 px-4 py-2 rounded-lg text-[9px] font-bold uppercase border border-white/10">В меню</button>
+          <button onclick="logoutAdmin()" class="flex-1 bg-red-900/20 text-red-500 px-4 py-2 rounded-lg text-[9px] font-bold uppercase border border-red-500/20">Выход с админки</button>
+        </div>
+      </div>
+      
+      <button onclick="toggleLive()" id="liveToggleBtn" class="w-full py-5 rounded-2xl font-bold uppercase transition shadow-xl">...</button>
+      
+      <div class="space-y-4 bg-white/5 p-6 rounded-3xl border border-white/10">
+        <input type="text" id="streamUrlInput" placeholder="Ссылка на плеер (iframe)" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-sm outline-none focus:border-pink-600">
+        <input type="text" id="streamNameInput" placeholder="Имя стрима" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-sm outline-none focus:border-pink-600">
+        <textarea id="scheduleTextarea" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-sm h-32 outline-none focus:border-pink-600 resize-none" placeholder="Расписание"></textarea>
+      </div>
+
+      <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+        <div class="flex justify-between items-center mb-4 text-[10px] font-black uppercase text-pink-500 tracking-widest">Баннеры</div>
+        <div id="adminBannersList" class="space-y-4"></div>
+        <button onclick="addBanner()" class="mt-4 w-full py-3 border-2 border-dashed border-white/10 rounded-2xl text-[10px] text-gray-500 hover:border-pink-600 transition uppercase font-bold">+ Добавить баннер</button>
+      </div>
+
+      <button onclick="saveSettings()" class="w-full py-5 bg-pink-600 rounded-2xl font-black text-xl shadow-2xl uppercase">Сохранить всё</button>
+    </div>
+  </div>
+
+  <div id="passwordModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[100] p-6">
+    <div class="w-full max-w-xs text-center">
+      <input type="password" id="passwordInput" class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-5 mb-4 text-white text-center text-3xl outline-none" placeholder="••••">
+      <button onclick="loginAdmin()" class="w-full bg-pink-600 py-4 rounded-2xl font-bold uppercase">Войти</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://mqcakdxhkwugckvuqygs.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_h-EbNY3-ziEUt_i4PmQ1gw_cmzSR2OH";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let state = { isLive: false, streamName: '', schedule: '', streamUrl: '', banners: [], isAdmin: sessionStorage.getItem('isLiveNetAdmin') === 'true' };
+
+    const sessionId = Math.random().toString(36).substring(7);
+    const channel = supabaseClient.channel('livenet_online', { config: { presence: { key: sessionId } } });
+    channel.on('presence', { event: 'sync' }, () => {
+        document.getElementById('userCount').textContent = Object.keys(channel.presenceState()).length;
+    }).subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') await channel.track({ online_at: new Date().toISOString() });
+    });
+
+    async function loadFromDB() {
+      const { data } = await supabaseClient.from('site_settings').select('*').single();
+      if (data) {
+        state.isLive = data.is_live;
+        state.streamUrl = data.stream_url || '';
+        state.banners = data.banners || [];
+        if (document.activeElement !== document.getElementById('streamNameInput')) state.streamName = data.stream_name || 'LiveNet';
+        if (document.activeElement !== document.getElementById('scheduleTextarea')) state.schedule = data.schedule || '';
+        updateUI();
+      }
+    }
+
+    async function saveSettings() {
+      const bannerElements = document.querySelectorAll('.admin-banner-item');
+      state.banners = Array.from(bannerElements).map(el => ({
+        img: el.querySelector('.b-img').value,
+        title: el.querySelector('.b-title').value,
+        url: el.querySelector('.b-url').value
+      }));
+      state.streamName = document.getElementById('streamNameInput').value;
+      state.streamUrl = document.getElementById('streamUrlInput').value;
+      state.schedule = document.getElementById('scheduleTextarea').value;
+      await supabaseClient.from('site_settings').update({ is_live: state.isLive, stream_name: state.streamName, schedule: state.schedule, stream_url: state.streamUrl, banners: state.banners }).eq('id', 1);
+      alert("Сохранено!");
+      updateUI();
+    }
+
+    function updateUI() {
+      document.getElementById('homeAdminBtn').classList.toggle('hide', !state.isAdmin);
+      document.getElementById('streamNameDisplay').textContent = state.streamName;
+      const iframe = document.getElementById('streamIframe');
+      if (state.isLive) {
+        document.getElementById('statusDot').className = "w-2 h-2 bg-red-500 animate-pulse rounded-full";
+        document.getElementById('statusText').textContent = "В ЭФИРЕ";
+        if (state.streamUrl && iframe.src !== state.streamUrl) iframe.src = state.streamUrl;
+      } else {
+        document.getElementById('statusDot').className = "w-2 h-2 bg-gray-600 rounded-full";
+        document.getElementById('statusText').textContent = "ВНЕ ЭФИРА";
+        iframe.classList.add('hide');
+        document.getElementById('playButton').classList.remove('hide');
+      }
+
+      document.getElementById('scheduleList').innerHTML = state.schedule.split('\n').filter(l => l.trim()).map(line => `<div class="bg-white/5 p-3 rounded-xl border border-white/5">${line}</div>`).join('') || 'Нет программы';
+      document.getElementById('bannersContainer').innerHTML = state.banners.map(b => `
+        <a href="${b.url}" target="_blank" class="block bg-white/5 p-3 rounded-2xl border border-white/10 hover:border-pink-600 transition">
+          <img src="${b.img || 'https://via.placeholder.com/300x150?text=LiveNet'}" class="banner-img">
+          <h4 class="font-bold text-xs uppercase px-1">${b.title || 'Кнопка'}</h4>
+        </a>
+      `).join('');
+
+      if (state.isAdmin) {
+        document.getElementById('liveToggleBtn').textContent = state.isLive ? "ВЫКЛЮЧИТЬ ЭФИР" : "ВКЛЮЧИТЬ ЭФИР";
+        document.getElementById('liveToggleBtn').className = `w-full py-4 rounded-xl font-bold transition ${state.isLive ? 'bg-red-600' : 'bg-green-600'}`;
+        if(document.getElementById('adminBannersList').children.length === 0) {
+            state.banners.forEach(b => addBannerUI(b));
+        }
+      }
+    }
+
+    function logoutAdmin() {
+        state.isAdmin = false;
+        sessionStorage.removeItem('isLiveNetAdmin');
+        showView('home');
+        updateUI();
+    }
+
+    function addBanner() { addBannerUI({img:'', title:'', url:''}); }
+    function addBannerUI(data) {
+        const div = document.createElement('div');
+        div.className = "admin-banner-item bg-black/50 p-4 rounded-xl border border-white/5 space-y-2";
+        div.innerHTML = `<input type="text" placeholder="URL картинки" class="b-img w-full bg-white/5 border border-white/10 p-2 rounded text-xs" value="${data.img}"><input type="text" placeholder="Название" class="b-title w-full bg-white/5 border border-white/10 p-2 rounded text-xs" value="${data.title}"><input type="text" placeholder="Ссылка" class="b-url w-full bg-white/5 border border-white/10 p-2 rounded text-xs" value="${data.url}"><button onclick="this.parentElement.remove()" class="text-[10px] text-red-500 uppercase font-bold">Удалить</button>`;
+        document.getElementById('adminBannersList').appendChild(div);
+    }
+
+    async function toggleLive() { state.isLive = !state.isLive; updateUI(); await supabaseClient.from('site_settings').update({ is_live: state.isLive }).eq('id', 1); }
+    function handlePlayButtonClick() { if (state.isLive) { document.getElementById('streamIframe').classList.remove('hide'); document.getElementById('playButton').classList.add('hide'); } else { document.getElementById('offlineState').classList.remove('hide'); setTimeout(()=>document.getElementById('offlineState').classList.add('hide'), 3000); } }
+    function loginAdmin() { if (document.getElementById('passwordInput').value === '7b06a998-72d8-458d-966') { state.isAdmin = true; sessionStorage.setItem('isLiveNetAdmin', 'true'); document.getElementById('passwordModal').classList.add('hide'); updateUI(); showView('admin'); } }
+    function showView(v) { document.getElementById('homeView').classList.toggle('hide', v !== 'home'); document.getElementById('playerView').classList.toggle('hide', v !== 'player'); document.getElementById('adminView').classList.toggle('hide', v !== 'admin'); window.scrollTo(0,0); }
+    function openPasswordModal() { document.getElementById('passwordModal').classList.remove('hide'); }
+    loadFromDB();
+    setInterval(loadFromDB, 15000);
+  </script>
+</body>
+</html>
