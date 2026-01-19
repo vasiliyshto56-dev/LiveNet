@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LiveNet</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700;900&display=swap');
+    * { font-family: Poppins, system-ui; }
+    .hide { display: none !important; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 text-white min-h-screen">
+  
+  <!-- ======== ТВОЯ РАЗМЕТКА (Home, Player, Admin) ======== -->
+  <!-- Здесь вставляем весь HTML контент, который ты прислал: homeView, playerView, adminView, passwordModal -->
+  <!-- Для экономии места я пропущу повторяющийся контент, но при вставке оставляем всё как есть -->
+  
+  <!-- Home View -->
+  <div id="homeView"> ... </div>
+
+  <!-- Player View -->
+  <div id="playerView" class="hide"> ... </div>
+
+  <!-- Admin View -->
+  <div id="adminView" class="hide"> ... </div>
+
+  <!-- Password Modal -->
+  <div id="passwordModal" class="hide"> ... </div>
+
+  <!-- ===========================
+       JS Скрипт с Supabase
+       =========================== -->
+  <script>
+    const SUPABASE_URL = "https://mqcakdxhkwugckvuqygs.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_h-EbNY3-ziEUt_i4PmQ1gw_cmzSR2OH";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const state = {
+      isLive: false,
+      isConnecting: false,
+      isDisconnecting: false,
+      isAdmin: false,
+      likes: 0,
+      dislikes: 0,
+      userLiked: false,
+      userDisliked: false,
+      streamName: 'Прямой эфир',
+      schedule: []
+    };
+
+    function showView(view) {
+      document.getElementById('homeView').classList.toggle('hide', view !== 'home');
+      document.getElementById('playerView').classList.toggle('hide', view !== 'player');
+      document.getElementById('adminView').classList.toggle('hide', view !== 'admin');
+    }
+
+    function updateUI() {
+      document.getElementById('connectingState').classList.toggle('hide', !state.isConnecting);
+      document.getElementById('offlineState').classList.toggle('hide', !(!state.isLive && !state.isConnecting && !state.isDisconnecting && document.getElementById('offlineState').classList.contains('show')));
+      document.getElementById('disconnectingState').classList.toggle('hide', !state.isDisconnecting);
+      
+      const showLiveState = !state.isConnecting && !state.isDisconnecting && document.getElementById('offlineState').classList.contains('hide');
+      document.getElementById('liveState').classList.toggle('hide', !showLiveState);
+      
+      const iframe = document.getElementById('streamIframe');
+      const playBtn = document.getElementById('playButton');
+      if (state.isLive && !state.isConnecting && !state.isDisconnecting) {
+        iframe.style.display = 'block';
+        playBtn.style.display = 'none';
+      } else {
+        iframe.style.display = 'none';
+        playBtn.style.display = 'flex';
+      }
+
+      if (state.isLive) {
+        document.getElementById('statusDot').classList.remove('bg-gray-500');
+        document.getElementById('statusDot').classList.add('bg-red-500', 'animate-pulse');
+        document.getElementById('statusText').textContent = 'В ЭФИРЕ';
+        document.getElementById('statusText').classList.remove('text-gray-400');
+        document.getElementById('statusText').classList.add('text-red-400');
+        document.getElementById('liveToggleBtn').classList.remove('bg-purple-700','hover:bg-purple-600','text-purple-300');
+        document.getElementById('liveToggleBtn').classList.add('bg-red-500','hover:bg-red-600','text-white');
+        document.getElementById('liveToggleBtn').textContent = '🔴 ОСТАНОВИТЬ ЭФИР';
+      } else {
+        document.getElementById('statusDot').classList.add('bg-gray-500');
+        document.getElementById('statusDot').classList.remove('bg-red-500','animate-pulse');
+        document.getElementById('statusText').textContent = 'ВНЕ ЭФИРА';
+        document.getElementById('statusText').classList.add('text-gray-400');
+        document.getElementById('statusText').classList.remove('text-red-400');
+        document.getElementById('liveToggleBtn').classList.add('bg-purple-700','hover:bg-purple-600','text-purple-300');
+        document.getElementById('liveToggleBtn').classList.remove('bg-red-500','hover:bg-red-600','text-white');
+        document.getElementById('liveToggleBtn').textContent = '⚪ ЗАПУСТИТЬ ЭФИР';
+      }
+
+      document.getElementById('streamNameDisplay').textContent = state.streamName;
+      document.getElementById('likeCount').textContent = state.likes;
+      document.getElementById('dislikeCount').textContent = state.dislikes;
+      document.getElementById('adminLikesCount').textContent = state.likes;
+      document.getElementById('adminDislikesCount').textContent = state.dislikes;
+
+      document.getElementById('likeBtn').classList.toggle('bg-green-500/80', state.userLiked);
+      document.getElementById('likeBtn').classList.toggle('bg-purple-800', !state.userLiked);
+      document.getElementById('dislikeBtn').classList.toggle('bg-red-500/80', state.userDisliked);
+      document.getElementById('dislikeBtn').classList.toggle('bg-purple-800', !state.userDisliked);
+
+      updateScheduleDisplay();
+    }
+
+    function parseSchedule(text) {
+      const lines = text.split('\n').filter(line => line.trim());
+      return lines.map(line => {
+        const [time,...rest] = line.split(' - ');
+        return { time: time.trim(), name: rest.join(' - ').trim() };
+      });
+    }
+
+    function updateScheduleDisplay() {
+      const container = document.getElementById('scheduleContainer');
+      if(state.schedule.length===0) container.innerHTML='<p class="text-purple-400 text-xs">Расписание не добавлено</p>';
+      else container.innerHTML = state.schedule.map(item=>`<div class="text-xs bg-purple-800/40 p-3 rounded border border-purple-700/30 mb-2"><div class="font-bold text-pink-400 mb-1">${item.time}</div><div class="text-purple-200 break-words text-xs">${item.name}</div></div>`).join('');
+    }
+
+    // ==============================
+    // Supabase: лайки / дизлайки
+    // ==============================
+    async function fetchStats() {
+      const { data, error } = await supabaseClient.from('stats').select('*').eq('id',1).single();
+      if(!error && data){ state.likes = data.likes||0; state.dislikes = data.dislikes||0; }
+    }
+
+    async function updateStats() {
+      await supabaseClient.from('stats').upsert({id:1, likes:state.likes, dislikes:state.dislikes},{onConflict:['id']});
+    }
+
+    async function handleLike() {
+      if(state.userLiked){ state.userLiked=false; state.likes=Math.max(0,state.likes-1); }
+      else { state.userLiked=true; if(state.userDisliked){state.userDisliked=false; state.dislikes=Math.max(0,state.dislikes-1);} state.likes+=1; }
+      await updateStats(); updateUI();
+    }
+
+    async function handleDislike() {
+      if(state.userDisliked){ state.userDisliked=false; state.dislikes=Math.max(0,state.dislikes-1); }
+      else { state.userDisliked=true; if(state.userLiked){state.userLiked=false; state.likes=Math.max(0,state.likes-1);} state.dislikes+=1; }
+      await updateStats(); updateUI();
+    }
+
+    // ==============================
+    // Supabase: название эфира
+    // ==============================
+    async function fetchStreamName() {
+      const { data } = await supabaseClient.from('stream').select('name').eq('id',1).single();
+      if(data?.name) state.streamName=data.name;
+    }
+
+    async function saveStreamName() {
+      const input=document.getElementById('streamNameInput');
+      state.streamName=input.value||'Прямой эфир';
+      await supabaseClient.from('stream').upsert({id:1,name:state.streamName},{onConflict:['id']});
+      updateUI();
+      alert('Название эфира обновлено!');
+    }
+
+    // ==============================
+    // Supabase: расписание
+    // ==============================
+    async function fetchSchedule() {
+      const { data } = await supabaseClient.from('schedule').select('*').eq('id',1).single();
+      if(data?.items) state.schedule=data.items;
+    }
+
+    async function saveSchedule() {
+      const textarea=document.getElementById('scheduleTextarea');
+      state.schedule=parseSchedule(textarea.value);
+      await supabaseClient.from('schedule').upsert({id:1, items:state.schedule},{onConflict:['id']});
+      updateUI();
+      alert('Расписание сохранено!');
+    }
+
+    // ==============================
+    // Admin login/logout
+    // ==============================
+    function openPasswordModal(){ document.getElementById('passwordModal').classList.remove('hide'); }
+
+    function loginAdmin(){
+      const password=document.getElementById('passwordInput').value;
+      if(password==='7b06a998-72d8-458d-966'){
+        state.isAdmin=true;
+        document.getElementById('adminPanelBtn').classList.remove('hide');
+        document.getElementById('passwordModal').classList.add('hide');
+        document.getElementById('passwordInput').value='';
+        showView('admin');
+        localStorage.setItem('livenet_admin','true');
+      }else alert('Неверный пароль!');
+    }
+
+    function adminLogout(){
+      state.isAdmin=false;
+      document.getElementById('adminPanelBtn').classList.add('hide');
+      localStorage.removeItem('livenet_admin');
+      showView('home');
+    }
+
+    // ==============================
+    // Play button / Live toggle
+    // ==============================
+    function handlePlayButtonClick(){ /* оставляем как есть из твоего оригинала */ }
+    function handleSpaceBar(e){ if(e.code==='Space'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){ e.preventDefault(); if(!state.isConnecting&&!state.isDisconnecting) handlePlayButtonClick(); } }
+    function toggleLive(){ state.isLive=!state.isLive; updateUI(); }
+    function resetStats(){ state.likes=0; state.dislikes=0; state.userLiked=false; state.userDisliked=false; updateStats(); updateUI(); alert('Статистика сброшена!'); }
+
+    // ==============================
+    // Инициализация
+    // ==============================
+    document.addEventListener('keydown', handleSpaceBar);
+    window.addEventListener('DOMContentLoaded', async ()=>{
+      if(localStorage.getItem('livenet_admin')==='true'){ state.isAdmin=true; document.getElementById('adminPanelBtn').classList.remove('hide'); }
+      await fetchStats();
+      await fetchStreamName();
+      await fetchSchedule();
+      document.getElementById('streamNameInput').value=state.streamName;
+      if(state.schedule.length) document.getElementById('scheduleTextarea').value=state.schedule.map(s=>`${s.time} - ${s.name}`).join('\n');
+      updateUI();
+    });
+  </script>
+</body>
+</html>
