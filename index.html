@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LiveNet</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +12,7 @@
     .hide { display: none !important; }
     .font-stream { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important; font-weight: 700; }
     .side-panel { background: #160d24; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; }
+    .banner-card { background: #160d24; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; overflow: hidden; }
     .nick-admin { background: linear-gradient(to right, #ff4d4d, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
     .deleted-msg { opacity: 0.5; text-decoration: line-through; color: #9ca3af; font-size: 11px; }
     
@@ -48,19 +49,19 @@
 
   <div id="homeView" class="flex-grow flex flex-col items-center justify-center relative min-h-screen">
     
-    <div class="absolute top-6 left-8 flex gap-3">
-        <button id="userProfileBtn" onclick="openMyProfile()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2">
+    <div class="absolute top-6 left-8 flex gap-3 z-20">
+        <button id="userProfileBtn" onclick="openMyProfile()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
             <div id="miniAvatar" class="w-5 h-5 rounded-full bg-pink-500 overflow-hidden hide"><img id="miniAvatarImg" src="" class="w-full h-full object-cover"></div>
             <span id="topBarUser">Войти</span>
         </button>
         
-        <button id="messengerBtn" onclick="openMessenger()" class="hide bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 relative transition">
+        <button id="messengerBtn" onclick="openMessenger()" class="hide bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 relative transition backdrop-blur-md">
             📩
             <div id="unreadDot" class="hide absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
         </button>
     </div>
     
-    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl" title="Вход админа">🛡️</button>
+    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl z-20" title="Вход админа">🛡️</button>
 
     <h1 class="text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase">LiveNet</h1>
     
@@ -121,24 +122,25 @@
   </div>
 
   <div id="messengerModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[140]">
-      <div class="bg-[#160d24] w-full max-w-4xl h-[80vh] rounded-[30px] border border-white/10 flex overflow-hidden shadow-2xl relative">
+      <div class="bg-[#160d24] w-full h-full md:h-[90vh] md:max-w-6xl md:rounded-[30px] border border-white/10 flex overflow-hidden shadow-2xl relative">
           <button onclick="document.getElementById('messengerModal').classList.add('hide')" class="absolute top-4 right-4 z-50 text-gray-500 hover:text-white text-2xl">✕</button>
           
-          <div class="w-1/3 border-r border-white/5 bg-[#0a0514]/50 flex flex-col">
+          <div id="dialogsColumn" class="w-full md:w-1/3 border-r border-white/5 bg-[#0a0514]/50 flex flex-col">
               <div class="p-4 border-b border-white/5"><h3 class="text-pink-500 font-bold uppercase text-xs tracking-widest">Сообщения</h3></div>
               <div id="dialogsList" class="flex-1 overflow-y-auto">
                   <div class="text-center p-4 text-[10px] opacity-30">Нет диалогов</div>
               </div>
           </div>
 
-          <div class="w-2/3 flex flex-col bg-[#050208]">
-              <div id="chatHeader" class="p-4 border-b border-white/5 flex items-center gap-3 hide">
-                  <img id="chatHeaderAvatar" class="w-8 h-8 rounded-full">
-                  <span id="chatHeaderName" class="font-bold text-sm">User</span>
+          <div id="chatColumn" class="hidden md:flex w-full md:w-2/3 flex-col bg-[#050208]">
+              <div id="chatHeader" class="p-4 border-b border-white/5 flex items-center gap-3">
+                  <button onclick="closeChatMobile()" class="md:hidden text-pink-500 font-bold text-xl mr-2">←</button>
+                  <img id="chatHeaderAvatar" class="w-8 h-8 rounded-full bg-gray-800">
+                  <span id="chatHeaderName" class="font-bold text-sm">Выберите чат</span>
               </div>
               
               <div id="dmMessages" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-                  <div class="flex items-center justify-center h-full text-gray-600 text-xs">Выберите диалог слева</div>
+                  <div class="flex items-center justify-center h-full text-gray-600 text-xs">Выберите диалог</div>
               </div>
 
               <div id="dmInputArea" class="p-4 border-t border-white/5 hide">
@@ -266,7 +268,7 @@
             state.profile = prof;
             renderProfile();
             requestNotificationPermission();
-            setInterval(checkUnreadMessages, 5000); // Проверка новых сообщений
+            setInterval(checkUnreadMessages, 5000);
         }
         
         if (state.isAdmin) {
@@ -296,33 +298,37 @@
         }
     }
 
-    // --- MESSENGER LOGIC ---
+    // --- MESSENGER LOGIC (MOBILE UPDATED) ---
     async function openMessenger() {
         if(!state.user) return openAuth();
         document.getElementById('messengerModal').classList.remove('hide');
+        // Reset view for mobile: Show List, Hide Chat
+        document.getElementById('dialogsColumn').classList.remove('hidden');
+        document.getElementById('chatColumn').classList.add('hidden');
+        document.getElementById('chatColumn').classList.remove('flex');
         loadDialogs();
     }
 
     async function openMessengerWithUser() {
         if(!state.user) return openAuth();
         document.getElementById('messengerModal').classList.remove('hide');
-        // Сразу открываем диалог
         loadChat(viewProfile.id, viewProfile.username, viewProfile.avatar);
     }
 
+    function closeChatMobile() {
+        // Mobile only: Return to list
+        document.getElementById('dialogsColumn').classList.remove('hidden');
+        document.getElementById('chatColumn').classList.add('hidden');
+        document.getElementById('chatColumn').classList.remove('flex');
+        state.activeChatUser = null;
+        if (msgInterval) clearInterval(msgInterval);
+    }
+
     async function loadDialogs() {
-        // Загружаем все сообщения, где я отправитель или получатель
-        const { data: msgs } = await supabaseClient.from('direct_messages')
-            .select('sender_id, receiver_id, created_at, is_read')
-            .or(`sender_id.eq.${state.user.id},receiver_id.eq.${state.user.id}`)
-            .order('created_at', { ascending: false });
-
+        const { data: msgs } = await supabaseClient.from('direct_messages').select('sender_id, receiver_id, created_at, is_read').or(`sender_id.eq.${state.user.id},receiver_id.eq.${state.user.id}`).order('created_at', { ascending: false });
         if (!msgs) return;
-
-        // Фильтруем уникальных собеседников
         const uniqueUsers = new Set();
         const dialogs = [];
-        
         for (const m of msgs) {
             const partnerId = m.sender_id === state.user.id ? m.receiver_id : m.sender_id;
             if (!uniqueUsers.has(partnerId)) {
@@ -330,21 +336,12 @@
                 dialogs.push({ id: partnerId, lastMsgTime: m.created_at });
             }
         }
-
         const listEl = document.getElementById('dialogsList');
         listEl.innerHTML = '';
-
         for (const d of dialogs) {
             const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', d.id).single();
             if(prof) {
-                listEl.innerHTML += `
-                <div onclick="loadChat('${prof.id}', '${prof.username}', '${prof.avatar_url}')" class="dialog-item p-3 cursor-pointer border-b border-white/5 flex items-center gap-3">
-                    <img src="${prof.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-8 h-8 rounded-full object-cover">
-                    <div class="flex-1">
-                        <div class="font-bold text-xs text-white">${prof.username}</div>
-                        <div class="text-[9px] text-gray-500">Нажмите для переписки</div>
-                    </div>
-                </div>`;
+                listEl.innerHTML += `<div onclick="loadChat('${prof.id}', '${prof.username}', '${prof.avatar_url}')" class="dialog-item p-3 cursor-pointer border-b border-white/5 flex items-center gap-3"><img src="${prof.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-8 h-8 rounded-full object-cover"><div class="flex-1"><div class="font-bold text-xs text-white">${prof.username}</div><div class="text-[9px] text-gray-500">Нажмите для переписки</div></div></div>`;
             }
         }
     }
@@ -352,26 +349,23 @@
     async function loadChat(partnerId, name, avatar) {
         state.activeChatUser = partnerId;
         
-        // UI Updates
-        document.getElementById('chatHeader').classList.remove('hide');
+        // Mobile Logic: Toggle Views
+        document.getElementById('dialogsColumn').classList.add('hidden'); // Hide list
+        document.getElementById('chatColumn').classList.remove('hidden'); // Show chat
+        document.getElementById('chatColumn').classList.add('flex');
+
         document.getElementById('dmInputArea').classList.remove('hide');
         document.getElementById('chatHeaderName').textContent = name;
         document.getElementById('chatHeaderAvatar').src = avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         
-        // Загрузка сообщений
         fetchMessages();
         if (msgInterval) clearInterval(msgInterval);
-        msgInterval = setInterval(fetchMessages, 3000); // Автообновление чата
+        msgInterval = setInterval(fetchMessages, 3000);
     }
 
     async function fetchMessages() {
         if (!state.activeChatUser) return;
-        
-        const { data: msgs } = await supabaseClient.from('direct_messages')
-            .select('*')
-            .or(`and(sender_id.eq.${state.user.id},receiver_id.eq.${state.activeChatUser}),and(sender_id.eq.${state.activeChatUser},receiver_id.eq.${state.user.id})`)
-            .order('created_at', { ascending: true });
-
+        const { data: msgs } = await supabaseClient.from('direct_messages').select('*').or(`and(sender_id.eq.${state.user.id},receiver_id.eq.${state.activeChatUser}),and(sender_id.eq.${state.activeChatUser},receiver_id.eq.${state.user.id})`).order('created_at', { ascending: true });
         const container = document.getElementById('dmMessages');
         container.innerHTML = msgs.map(m => {
             const isMe = m.sender_id === state.user.id;
@@ -384,36 +378,18 @@
         const inp = document.getElementById('dmInput');
         const text = inp.value.trim();
         if (!text || !state.activeChatUser) return;
-
-        await supabaseClient.from('direct_messages').insert([{
-            sender_id: state.user.id,
-            receiver_id: state.activeChatUser,
-            text: text
-        }]);
-        
-        inp.value = '';
-        fetchMessages();
+        await supabaseClient.from('direct_messages').insert([{ sender_id: state.user.id, receiver_id: state.activeChatUser, text: text }]);
+        inp.value = ''; fetchMessages();
     }
 
     async function checkUnreadMessages() {
         if (!state.user) return;
-        const { count } = await supabaseClient.from('direct_messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('receiver_id', state.user.id)
-            .eq('is_read', false);
-        
+        const { count } = await supabaseClient.from('direct_messages').select('*', { count: 'exact', head: true }).eq('receiver_id', state.user.id).eq('is_read', false);
         const dot = document.getElementById('unreadDot');
-        if (count > 0) {
-            dot.classList.remove('hide');
-            if (Notification.permission === "granted") {
-                // Можно добавить звук или уведомление, если нужно
-            }
-        } else {
-            dot.classList.add('hide');
-        }
+        if (count > 0) dot.classList.remove('hide'); else dot.classList.add('hide');
     }
 
-    // --- VOTES, PROFILES, ETC (OLD LOGIC KEPT) ---
+    // --- VOTES ---
     async function loadVotes() {
         const { count: likes } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'like');
         const { count: dislikes } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'dislike');
@@ -436,7 +412,7 @@
         updateVoteUI(); loadVotes();
     }
 
-    // --- USER PROFILE & SUBS ---
+    // --- USER PROFILE ---
     function openMyProfile() { if(!state.user) return openAuth(); openUserProfile(state.user.id); }
     async function openUserProfile(userId) {
         if (!userId) return;
@@ -474,7 +450,7 @@
         updateProfileControls();
     }
 
-    // --- AUTH FIXED ---
+    // --- AUTH ---
     async function handleAuth() {
         const email = document.getElementById('authEmail').value;
         const pass = document.getElementById('authPassword').value;
@@ -503,7 +479,7 @@
     }
     function toggleAuthMode() { authMode = authMode === 'login' ? 'register' : 'login'; document.getElementById('authTitle').textContent = authMode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ'; document.getElementById('authStep1').classList.remove('hide'); document.getElementById('authStep2').classList.add('hide'); }
 
-    // --- STANDARD FUNCTIONS ---
+    // --- OTHER ---
     async function sendMsg() { const inp = document.getElementById('msgInp'); if (!inp.value.trim() || state.profile.is_banned) return; await supabaseClient.from('messages').insert([{ username: state.profile.username, text: inp.value, user_id: state.user.id, avatar_url: state.profile.avatar_url, is_admin: state.isAdmin }]); inp.value = ''; loadMessages(); }
     async function loadMessages() { const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false }).limit(40); if (!data) return; document.getElementById('chatMessages').innerHTML = data.reverse().map(m => { if (m.is_deleted && !state.isAdmin) return ''; const isDel = m.is_deleted && state.isAdmin; return `<div class="flex gap-2 mb-2 group items-start"><button onclick="openUserProfile('${m.user_id}')" class="hover:opacity-70 transition"><img src="${m.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10"></button><div class="flex-1 min-w-0"><button onclick="openUserProfile('${m.user_id}')" class="hover:underline text-left"><span class="${m.is_admin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${m.username}:</span></button><span class="text-white ml-1 break-all text-xs ${isDel ? 'deleted-msg' : ''}">${isDel ? '(Удалено) ' + m.text : m.text}</span></div>${state.isAdmin && !m.is_deleted ? `<div class="opacity-0 group-hover:opacity-100 flex gap-1 transition"><button onclick="modDel('${m.id}')" title="Удалить">🗑️</button><button onclick="modMute('${m.user_id}', true)" title="Мут">🔇</button><button onclick="modBan('${m.user_id}', true)" title="Бан">🚫</button></div>` : ''}</div>`; }).join(''); const chat = document.getElementById('chatMessages'); if(chat.dataset.scrolled !== "true") chat.scrollTop = chat.scrollHeight; }
     async function modMute(uid, mute) { const until = mute ? new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() : null; await supabaseClient.from('profiles').update({ muted_until: until }).eq('id', uid); }
