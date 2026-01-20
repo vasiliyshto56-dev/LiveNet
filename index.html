@@ -15,6 +15,17 @@
     .banner-card { background: #160d24; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; overflow: hidden; }
     .nick-admin { background: linear-gradient(to right, #ff4d4d, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
     .deleted-msg { opacity: 0.5; text-decoration: line-through; color: #9ca3af; font-size: 11px; }
+    
+    /* Профиль пользователя (YouTube style) */
+    .profile-header { background: linear-gradient(to bottom, #ec4899 0%, #0a0514 100%); padding-top: 60px; padding-bottom: 20px; }
+    .profile-avatar-xl { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #0a0514; object-fit: cover; }
+    
+    /* Бегущая строка */
+    .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 30px; display: flex; align-items: center; }
+    .ticker { white-space: nowrap; padding-right: 100%; animation-iteration-count: infinite; animation-timing-function: linear; animation-name: ticker; animation-duration: 20s; }
+    .ticker-item { display: inline-block; padding: 0 2rem; font-size: 12px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; }
+    @keyframes ticker { 0% { transform: translate3d(100%, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
   </style>
@@ -28,12 +39,14 @@
         <span id="topBarUser">Войти</span>
     </button>
     
+    <button onclick="openRequestModal()" class="absolute top-6 left-32 ml-4 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition">📝 Предложить контент</button>
+
     <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl" title="Вход админа">🛡️</button>
 
     <h1 class="text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase">LiveNet</h1>
     
     <div class="flex flex-col gap-4 w-full max-w-xs">
-      <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg">▶ СМОТРЕТЬ</button>
+      <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg">▶ СМОТРЕТЬ ЭФИР</button>
       <a href="https://t.me/livenet_official" target="_blank" class="py-5 bg-[#229ED9] rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic text-center shadow-lg">TELEGRAM</a>
       <button id="mainMenuAdminBtn" onclick="showView('admin')" class="hide py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px] tracking-widest border border-white/10 mt-2 hover:bg-white/10 text-pink-500">⚙️ Админ панель</button>
     </div>
@@ -42,24 +55,22 @@
   </div>
 
   <div id="playerView" class="hide p-4 md:p-8 flex-grow">
-    <button onclick="showView('home')" class="mb-6 opacity-50 hover:opacity-100 transition flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">
-      ◄ МЕНЮ
-    </button>
+    <button onclick="showView('home')" class="mb-6 opacity-50 hover:opacity-100 transition flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">◄ МЕНЮ</button>
 
     <div class="max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-8">
-      <div class="flex-[3] relative">
-        <div class="bg-black rounded-2xl border-2 border-pink-500/30 overflow-hidden shadow-2xl relative aspect-video flex items-center justify-center">
+      <div class="flex-[3] relative flex flex-col gap-0">
+        <div class="bg-black rounded-t-2xl border-x-2 border-t-2 border-pink-500/30 overflow-hidden shadow-2xl relative aspect-video flex items-center justify-center">
             <div id="offlineState" class="hide absolute inset-0 bg-black/95 z-30 flex flex-col items-center justify-center text-center">
               <span class="text-6xl mb-4">😢</span>
               <h2 class="text-lg font-bold uppercase italic text-white font-stream">Увы, но мы вне эфира!</h2>
               <button onclick="document.getElementById('offlineState').classList.add('hide'); document.getElementById('playButton').classList.remove('hide')" class="mt-6 text-[10px] opacity-30 uppercase border px-3 py-1 rounded">Скрыть</button>
             </div>
-            
             <iframe id="streamIframe" class="w-full h-full hide" src="" frameborder="0" allowfullscreen="true" scrolling="no"></iframe>
-            
-            <div id="playButton" onclick="handlePlayButtonClick()" class="w-20 h-20 bg-pink-600 rounded-full flex items-center justify-center shadow-2xl z-20 cursor-pointer hover:scale-110 transition active:scale-95">
-              <span class="text-3xl ml-1 text-white">▶</span>
-            </div>
+            <div id="playButton" onclick="handlePlayButtonClick()" class="w-20 h-20 bg-pink-600 rounded-full flex items-center justify-center shadow-2xl z-20 cursor-pointer hover:scale-110 transition active:scale-95"><span class="text-3xl ml-1 text-white">▶</span></div>
+        </div>
+        
+        <div class="ticker-wrap rounded-b-2xl border-x-2 border-b-2 border-pink-500/30">
+             <div class="ticker"><div id="newsTickerDisplay" class="ticker-item">Добро пожаловать на LiveNet!</div></div>
         </div>
       </div>
 
@@ -70,9 +81,7 @@
                 <span class="text-xs">👤</span>
                 <span id="realOnlineCount" class="text-xs font-bold text-pink-500 font-stream">0</span>
               </div>
-              <div id="moscowTime" class="text-[12px] font-bold text-white font-stream uppercase">
-                  00:00:00 <span class="opacity-40 text-[9px] ml-1">(МСК)</span>
-              </div>
+              <div id="moscowTime" class="text-[12px] font-bold text-white font-stream uppercase">00:00:00 <span class="opacity-40 text-[9px] ml-1">(МСК)</span></div>
            </div>
            <div class="flex items-center gap-2 mb-1">
               <div id="statusDot" class="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
@@ -89,7 +98,11 @@
         <div class="side-panel flex flex-col h-[400px]">
             <h3 class="text-[9px] font-black uppercase text-pink-500 mb-4 tracking-[0.3em] font-stream italic">ЧАТ</h3>
             <div id="chatMessages" class="flex-1 overflow-y-auto space-y-2 mb-4 text-[12px] font-stream pr-1"></div>
-            <div id="chatInputArea"></div>
+            <div id="chatInputArea" class="mb-2"></div>
+            
+            <button onclick="openRequestModal()" class="w-full py-2 bg-pink-600/20 border border-pink-500/30 rounded-xl text-[10px] font-bold uppercase hover:bg-pink-600 hover:text-white transition flex items-center justify-center gap-2">
+                📝 Заказать эфир / Фильм
+            </button>
         </div>
       </div>
     </div>
@@ -100,6 +113,36 @@
         </h3>
         <div id="bannersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
     </div>
+  </div>
+
+  <div id="userProfileView" class="hide flex-grow flex flex-col items-center pt-10 min-h-screen">
+      <button onclick="showView('player')" class="absolute top-8 left-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">
+        ◄ Назад к эфиру
+      </button>
+
+      <div class="w-full max-w-2xl bg-[#160d24] rounded-3xl overflow-hidden border border-white/5 shadow-2xl mt-10">
+          <div class="profile-header flex flex-col items-center justify-center">
+              <img id="viewUserAvatar" src="" class="profile-avatar-xl mb-4 shadow-xl">
+              <h2 id="viewUserName" class="text-3xl font-black italic uppercase text-white mb-1">User</h2>
+              <div class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">Зритель LiveNet</div>
+              
+              <div class="flex gap-4">
+                  <div class="text-center">
+                      <div id="viewUserSubs" class="text-2xl font-bold text-white">0</div>
+                      <div class="text-[9px] text-gray-500 uppercase">Подписчиков</div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="p-8 flex flex-col items-center gap-4">
+              <button id="subBtn" onclick="toggleSubscribe()" class="w-full max-w-xs py-3 bg-white text-black rounded-full font-bold uppercase hover:scale-105 transition shadow-lg">
+                  Подписаться
+              </button>
+              <button onclick="writeToUser()" class="w-full max-w-xs py-3 bg-white/5 border border-white/10 rounded-full font-bold uppercase hover:bg-white/10 transition text-xs">
+                  💬 Написать в чат
+              </button>
+          </div>
+      </div>
   </div>
 
   <div id="adminView" class="hide min-h-screen p-8 bg-[#050208]">
@@ -115,17 +158,40 @@
       <button onclick="toggleLive()" id="liveToggleBtn" class="w-full py-5 rounded-2xl font-black mb-6 transition uppercase italic shadow-xl text-xl">...</button>
 
       <div class="bg-white/5 p-6 rounded-3xl border border-white/10 space-y-4 mb-6">
+        <label class="text-[10px] text-gray-500 font-bold uppercase ml-2">Бегущая строка (Новости)</label>
+        <input type="text" id="tickerInput" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none font-stream mb-2" placeholder="Текст бегущей строки...">
+
         <label class="text-[10px] text-gray-500 font-bold uppercase ml-2">Название эфира</label>
         <input type="text" id="streamNameInput" class="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none font-stream">
         
         <label class="text-[10px] text-gray-500 font-bold uppercase ml-2">Расписание</label>
         <textarea id="scheduleTextarea" class="w-full bg-black border border-white/10 p-4 rounded-xl h-32 resize-none font-stream outline-none text-sm text-gray-400"></textarea>
       </div>
+      
+      <div class="bg-white/5 p-6 rounded-3xl border border-white/10 space-y-4 mb-6">
+          <div class="flex justify-between items-center">
+              <h3 class="text-pink-500 font-bold uppercase text-xs">Стол заказов (Последние)</h3>
+              <button onclick="loadAdminRequests()" class="text-[9px] underline opacity-50">Обновить</button>
+          </div>
+          <div id="adminRequestsList" class="space-y-2 text-xs text-gray-300 max-h-40 overflow-y-auto">
+              <div class="opacity-30">Загрузка...</div>
+          </div>
+      </div>
 
       <div id="adminBannersList" class="space-y-3 mb-6"></div>
       <button onclick="addBanner()" class="w-full py-3 mb-8 border-2 border-dashed border-white/10 rounded-xl text-gray-600 text-[10px] font-bold">+ ДОБАВИТЬ БАННЕР</button>
       <button onclick="saveSettings()" class="w-full py-5 bg-pink-600 rounded-2xl font-black text-xl uppercase shadow-pink-500/20 shadow-2xl transition">СОХРАНИТЬ ВСЁ</button>
     </div>
+  </div>
+
+  <div id="requestModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[130]">
+      <div class="bg-[#160d24] p-8 rounded-[30px] w-80 border border-white/10 text-center relative">
+          <button onclick="document.getElementById('requestModal').classList.add('hide')" class="absolute top-4 right-4 opacity-50">✕</button>
+          <h3 class="text-pink-500 font-bold mb-4 uppercase text-xs">Стол заказов</h3>
+          <p class="text-[10px] text-gray-400 mb-4">Какой фильм или передачу поставить следующим?</p>
+          <input id="requestInput" class="w-full bg-black border border-white/10 p-3 rounded-xl mb-4 text-white outline-none text-xs" placeholder="Название фильма...">
+          <button onclick="sendRequest()" class="w-full bg-pink-600 py-3 rounded-xl font-bold uppercase text-xs">Отправить</button>
+      </div>
   </div>
 
   <div id="passwordModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[100]">
@@ -171,10 +237,13 @@
     const SUPABASE_KEY = "sb_publishable_h-EbNY3-ziEUt_i4PmQ1gw_cmzSR2OH"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let state = { user: null, profile: null, isLive: false, streamName: '', banners: [], schedule: '', isAdmin: false };
+    let state = { user: null, profile: null, isLive: false, streamName: '', banners: [], schedule: '', isAdmin: false, ticker: '' };
+    // Для профиля пользователя
+    let viewProfile = { id: null, username: '', avatar: '', isSubscribed: false };
+
     let authMode = 'login';
     let muteInterval = null;
-    let areInputsPopulated = false; // Флаг, чтобы знать, заполнили ли мы админку
+    let areInputsPopulated = false;
 
     if (sessionStorage.getItem('isLiveNetAdmin') === 'true') { state.isAdmin = true; }
 
@@ -202,6 +271,7 @@
         if (state.isAdmin) {
             document.getElementById('mainMenuAdminBtn').classList.remove('hide');
             document.getElementById('adminLoginIcon').classList.add('hide');
+            loadAdminRequests();
         }
 
         loadDB();
@@ -219,6 +289,103 @@
         document.getElementById('profileNameBig').textContent = state.profile.username;
     }
 
+    // --- USER PROFILES (YOUTUBE STYLE) ---
+    async function openUserProfile(userId) {
+        if (!userId) return;
+        showView('userProfile');
+        
+        // 1. Грузим данные юзера
+        const { data: userProf } = await supabaseClient.from('profiles').select('*').eq('id', userId).single();
+        if (!userProf) return alert("Пользователь не найден");
+
+        viewProfile.id = userId;
+        viewProfile.username = userProf.username;
+        viewProfile.avatar = userProf.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+        document.getElementById('viewUserAvatar').src = viewProfile.avatar;
+        document.getElementById('viewUserName').textContent = viewProfile.username;
+
+        // 2. Грузим количество подписчиков
+        const { count } = await supabaseClient.from('subscriptions').select('*', { count: 'exact', head: true }).eq('following_id', userId);
+        document.getElementById('viewUserSubs').textContent = count || 0;
+
+        // 3. Проверяем, подписан ли Я на него
+        if (state.user) {
+            const { data: sub } = await supabaseClient.from('subscriptions').select('*').eq('follower_id', state.user.id).eq('following_id', userId).single();
+            viewProfile.isSubscribed = !!sub;
+        } else {
+            viewProfile.isSubscribed = false;
+        }
+        updateSubButton();
+    }
+
+    function updateSubButton() {
+        const btn = document.getElementById('subBtn');
+        // Если это мой профиль - скрываем кнопку
+        if (state.user && state.user.id === viewProfile.id) {
+            btn.classList.add('hide');
+        } else {
+            btn.classList.remove('hide');
+            if (viewProfile.isSubscribed) {
+                btn.textContent = "ВЫ ПОДПИСАНЫ";
+                btn.className = "w-full max-w-xs py-3 bg-[#160d24] text-gray-400 border border-white/20 rounded-full font-bold uppercase hover:bg-white/5 transition";
+            } else {
+                btn.textContent = "ПОДПИСАТЬСЯ";
+                btn.className = "w-full max-w-xs py-3 bg-white text-black rounded-full font-bold uppercase hover:scale-105 transition shadow-lg";
+            }
+        }
+    }
+
+    async function toggleSubscribe() {
+        if (!state.user) return openAuth();
+        if (state.user.id === viewProfile.id) return; // Нельзя на себя
+
+        if (viewProfile.isSubscribed) {
+            // Отписка
+            await supabaseClient.from('subscriptions').delete().eq('follower_id', state.user.id).eq('following_id', viewProfile.id);
+            viewProfile.isSubscribed = false;
+        } else {
+            // Подписка
+            await supabaseClient.from('subscriptions').insert([{ follower_id: state.user.id, following_id: viewProfile.id }]);
+            viewProfile.isSubscribed = true;
+        }
+        // Обновляем UI
+        openUserProfile(viewProfile.id);
+    }
+
+    function writeToUser() {
+        if (!state.user) return openAuth();
+        showView('player');
+        // Просто вставляем тег в чат
+        const inp = document.getElementById('msgInp');
+        inp.value = `@${viewProfile.username} `;
+        inp.focus();
+    }
+
+    // --- REQUESTS ---
+    function openRequestModal() {
+        if (!state.user) return openAuth();
+        document.getElementById('requestModal').classList.remove('hide');
+    }
+
+    async function sendRequest() {
+        const txt = document.getElementById('requestInput').value;
+        if (!txt.trim()) return;
+        await supabaseClient.from('requests').insert([{ username: state.profile.username, request_text: txt }]);
+        alert("✅ Заявка отправлена админу!");
+        document.getElementById('requestInput').value = '';
+        document.getElementById('requestModal').classList.add('hide');
+    }
+
+    async function loadAdminRequests() {
+        if (!state.isAdmin) return;
+        const { data } = await supabaseClient.from('requests').select('*').order('created_at', { ascending: false }).limit(10);
+        const list = document.getElementById('adminRequestsList');
+        if (!data || data.length === 0) { list.innerHTML = '<div class="opacity-30">Нет новых заявок</div>'; return; }
+        list.innerHTML = data.map(r => `<div class="bg-black/40 p-2 rounded flex justify-between items-center border border-white/5"><div><span class="text-pink-500 font-bold">${r.username}:</span> <span class="text-white">${r.request_text}</span></div><div class="text-[8px] opacity-50">${new Date(r.created_at).toLocaleTimeString()}</div></div>`).join('');
+    }
+
+    // --- AUTH ---
     async function handleAuth() {
         const email = document.getElementById('authEmail').value;
         const pass = document.getElementById('authPassword').value;
@@ -241,6 +408,7 @@
     }
     function toggleAuthMode() { authMode = authMode === 'login' ? 'register' : 'login'; document.getElementById('authTitle').textContent = authMode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ'; }
 
+    // --- CHAT ---
     function startMuteChecker() {
         if (muteInterval) clearInterval(muteInterval);
         muteInterval = setInterval(() => {
@@ -285,11 +453,17 @@
         document.getElementById('chatMessages').innerHTML = data.reverse().map(m => {
             if (m.is_deleted && !state.isAdmin) return '';
             const isDel = m.is_deleted && state.isAdmin;
+            
+            // ТЕПЕРЬ АВАТАР И НИК КЛИКАБЕЛЬНЫ!
             return `
             <div class="flex gap-2 mb-2 group items-start">
-                <img src="${m.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10">
+                <button onclick="openUserProfile('${m.user_id}')" class="hover:opacity-70 transition">
+                    <img src="${m.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10">
+                </button>
                 <div class="flex-1 min-w-0">
-                    <span class="${m.is_admin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${m.username}:</span>
+                    <button onclick="openUserProfile('${m.user_id}')" class="hover:underline text-left">
+                        <span class="${m.is_admin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${m.username}:</span>
+                    </button>
                     <span class="text-white ml-1 break-all text-xs ${isDel ? 'deleted-msg' : ''}">${isDel ? '(Удалено) ' + m.text : m.text}</span>
                 </div>
                 ${state.isAdmin && !m.is_deleted ? `
@@ -311,7 +485,7 @@
     async function modDel(id) { await supabaseClient.from('messages').update({ is_deleted: true }).eq('id', id); loadMessages(); }
     async function modBan(uid, ban) { await supabaseClient.from('profiles').update({ is_banned: ban }).eq('id', uid); }
 
-    // --- DB & ADMIN SYNC ---
+    // --- DB ---
     async function loadDB() {
         const { data } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single();
         if (!data) return;
@@ -321,7 +495,12 @@
         state.banners = data.banners || [];
         state.schedule = data.schedule || '';
 
-        // Обновляем плеер и информацию
+        // Обновляем бегущую строку (если изменилась)
+        if (data.news_ticker && data.news_ticker !== state.ticker) {
+            state.ticker = data.news_ticker;
+            document.getElementById('newsTickerDisplay').textContent = state.ticker;
+        }
+
         document.getElementById('streamNameDisplay').textContent = state.streamName;
         document.getElementById('statusDot').className = state.isLive ? "w-1.5 h-1.5 bg-red-500 animate-pulse rounded-full" : "w-1.5 h-1.5 bg-gray-600 rounded-full";
         document.getElementById('statusText').textContent = state.isLive ? "В ЭФИРЕ" : "ОФФЛАЙН";
@@ -339,16 +518,12 @@
             </a>
         `).join('');
 
-        // !!! АВТОЗАПОЛНЕНИЕ АДМИНКИ ПРИ ПЕРЕЗАГРУЗКЕ !!!
         if (state.isAdmin && !areInputsPopulated) {
             document.getElementById('streamNameInput').value = state.streamName;
             document.getElementById('scheduleTextarea').value = state.schedule;
-            
-            // Восстанавливаем баннеры в админке
+            document.getElementById('tickerInput').value = state.ticker;
             const list = document.getElementById('adminBannersList');
-            if (list.children.length === 0) {
-                state.banners.forEach(b => addBanner(b));
-            }
+            if (list.children.length === 0) state.banners.forEach(b => addBanner(b));
             areInputsPopulated = true;
         }
     }
@@ -361,8 +536,16 @@
         }));
         const newName = document.getElementById('streamNameInput').value;
         const newSched = document.getElementById('scheduleTextarea').value;
+        const newTicker = document.getElementById('tickerInput').value;
 
-        await supabaseClient.from('site_settings').upsert({ id: 1, is_live: state.isLive, stream_name: newName, schedule: newSched, banners: newBanners });
+        await supabaseClient.from('site_settings').upsert({ 
+            id: 1, 
+            is_live: state.isLive, 
+            stream_name: newName, 
+            schedule: newSched, 
+            banners: newBanners,
+            news_ticker: newTicker
+        });
         alert("Сохранено!"); loadDB();
     }
 
@@ -402,7 +585,6 @@
     function handlePlayButtonClick() {
         if (state.isLive) {
             const host = window.location.hostname || 'localhost';
-            // Добавил muted=true и parent, чтобы избежать черного экрана
             const iframe = document.getElementById('streamIframe');
             iframe.src = `https://player.twitch.tv/?channel=livenet_&parent=${host}&muted=true`;
             iframe.classList.remove('hide');
@@ -418,9 +600,11 @@
         document.getElementById('homeView').classList.toggle('hide', v !== 'home');
         document.getElementById('playerView').classList.toggle('hide', v !== 'player');
         document.getElementById('adminView').classList.toggle('hide', v !== 'admin');
+        document.getElementById('userProfileView').classList.toggle('hide', v !== 'userProfile');
+        
         if (v !== 'player') { 
             const iframe = document.getElementById('streamIframe');
-            iframe.src = ""; // Очищаем iframe при уходе со страницы, чтобы не грузил фон
+            iframe.src = ""; 
         }
         window.scrollTo(0,0);
     }
@@ -432,8 +616,9 @@
             document.getElementById('mainMenuAdminBtn').classList.remove('hide');
             document.getElementById('adminLoginIcon').classList.add('hide');
             showView('admin'); 
-            areInputsPopulated = false; // Сбрасываем флаг, чтобы при входе данные подтянулись
+            areInputsPopulated = false; 
             loadDB();
+            loadAdminRequests();
         } else alert("Неверный пароль!"); 
     }
 
