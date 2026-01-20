@@ -15,10 +15,6 @@
     .banner-card { background: #160d24; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; overflow: hidden; }
     .nick-admin { background: linear-gradient(to right, #ff4d4d, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
     .deleted-msg { opacity: 0.5; text-decoration: line-through; color: #9ca3af; font-size: 11px; }
-    
-    /* Плавность */
-    * { transition-property: color, background-color, border-color, opacity; transition-duration: 0.15s; }
-    
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
   </style>
@@ -27,12 +23,12 @@
 
   <div id="homeView" class="flex-grow flex flex-col items-center justify-center relative min-h-screen">
     
-    <button id="userProfileBtn" onclick="openProfileModal()" class="absolute top-6 left-8 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 flex items-center gap-2">
+    <button id="userProfileBtn" onclick="openProfileModal()" class="absolute top-6 left-8 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2">
         <div id="miniAvatar" class="w-5 h-5 rounded-full bg-pink-500 overflow-hidden hide"><img id="miniAvatarImg" src="" class="w-full h-full object-cover"></div>
         <span id="topBarUser">Войти</span>
     </button>
     
-    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 text-3xl" title="Вход админа">🛡️</button>
+    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl" title="Вход админа">🛡️</button>
 
     <h1 class="text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase">LiveNet</h1>
     
@@ -46,7 +42,7 @@
   </div>
 
   <div id="playerView" class="hide p-4 md:p-8 flex-grow">
-    <button onclick="showView('home')" class="mb-6 opacity-50 hover:opacity-100 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">
+    <button onclick="showView('home')" class="mb-6 opacity-50 hover:opacity-100 transition flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">
       ◄ МЕНЮ
     </button>
 
@@ -58,8 +54,10 @@
               <h2 class="text-lg font-bold uppercase italic text-white font-stream">Увы, но мы вне эфира!</h2>
               <button onclick="document.getElementById('offlineState').classList.add('hide'); document.getElementById('playButton').classList.remove('hide')" class="mt-6 text-[10px] opacity-30 uppercase border px-3 py-1 rounded">Скрыть</button>
             </div>
+            
             <iframe id="streamIframe" class="w-full h-full hide" src="" frameborder="0" allowfullscreen="true" scrolling="no"></iframe>
-            <div id="playButton" onclick="handlePlayButtonClick()" class="w-20 h-20 bg-pink-600 rounded-full flex items-center justify-center shadow-2xl z-20 cursor-pointer hover:scale-110 active:scale-95">
+            
+            <div id="playButton" onclick="handlePlayButtonClick()" class="w-20 h-20 bg-pink-600 rounded-full flex items-center justify-center shadow-2xl z-20 cursor-pointer hover:scale-110 transition active:scale-95">
               <span class="text-3xl ml-1 text-white">▶</span>
             </div>
         </div>
@@ -109,12 +107,12 @@
       <div class="flex justify-between items-center mb-10">
         <h2 class="text-2xl font-black italic uppercase text-pink-500">УПРАВЛЕНИЕ</h2>
         <div class="flex gap-2">
-            <button onclick="showView('home')" class="bg-white/10 px-4 py-2 rounded-lg text-[10px] font-bold uppercase hover:bg-white/20">В МЕНЮ</button>
-            <button onclick="logoutAdmin()" class="bg-red-600/20 text-red-500 border border-red-500/30 px-4 py-2 rounded-lg text-[10px] font-bold uppercase hover:bg-red-600 hover:text-white">ВЫЙТИ ИЗ АДМИНКИ</button>
+            <button onclick="showView('home')" class="bg-white/10 px-4 py-2 rounded-lg text-[10px] font-bold uppercase hover:bg-white/20 transition">В МЕНЮ</button>
+            <button onclick="logoutAdmin()" class="bg-red-600/20 text-red-500 border border-red-500/30 px-4 py-2 rounded-lg text-[10px] font-bold uppercase hover:bg-red-600 hover:text-white transition">ВЫЙТИ ИЗ АДМИНКИ</button>
         </div>
       </div>
 
-      <button onclick="toggleLive()" id="liveToggleBtn" class="w-full py-5 rounded-2xl font-black mb-6 uppercase italic shadow-xl text-xl transition-all">...</button>
+      <button onclick="toggleLive()" id="liveToggleBtn" class="w-full py-5 rounded-2xl font-black mb-6 transition uppercase italic shadow-xl text-xl">...</button>
 
       <div class="bg-white/5 p-6 rounded-3xl border border-white/10 space-y-4 mb-6">
         <label class="text-[10px] text-gray-500 font-bold uppercase ml-2">Название эфира</label>
@@ -126,7 +124,7 @@
 
       <div id="adminBannersList" class="space-y-3 mb-6"></div>
       <button onclick="addBanner()" class="w-full py-3 mb-8 border-2 border-dashed border-white/10 rounded-xl text-gray-600 text-[10px] font-bold">+ ДОБАВИТЬ БАННЕР</button>
-      <button onclick="saveSettings()" class="w-full py-5 bg-pink-600 rounded-2xl font-black text-xl uppercase shadow-pink-500/20 shadow-2xl">СОХРАНИТЬ ВСЁ</button>
+      <button onclick="saveSettings()" class="w-full py-5 bg-pink-600 rounded-2xl font-black text-xl uppercase shadow-pink-500/20 shadow-2xl transition">СОХРАНИТЬ ВСЁ</button>
     </div>
   </div>
 
@@ -173,25 +171,22 @@
     const SUPABASE_KEY = "sb_publishable_h-EbNY3-ziEUt_i4PmQ1gw_cmzSR2OH"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Кэш состояния (чтобы не перерисовывать лишний раз и убрать лаги)
     let state = { user: null, profile: null, isLive: false, streamName: '', banners: [], schedule: '', isAdmin: false };
     let authMode = 'login';
     let muteInterval = null;
+    let areInputsPopulated = false; // Флаг, чтобы знать, заполнили ли мы админку
 
     if (sessionStorage.getItem('isLiveNetAdmin') === 'true') { state.isAdmin = true; }
 
     async function init() {
-        // Часы
         setInterval(() => {
             const time = new Intl.DateTimeFormat('ru-RU', {timeZone: 'Europe/Moscow', hour: '2-digit', minute:'2-digit', second: '2-digit'}).format(new Date());
             document.getElementById('moscowTime').innerHTML = `${time} <span class="opacity-40 text-[9px] ml-1">(МСК)</span>`;
         }, 1000);
 
-        // Реальный онлайн
         const channel = supabaseClient.channel('room_1', { config: { presence: { key: Math.random().toString(36).substring(7) } } });
         channel.on('presence', { event: 'sync' }, () => document.getElementById('realOnlineCount').textContent = Object.keys(channel.presenceState()).length).subscribe(async (status) => { if (status === 'SUBSCRIBED') await channel.track({ online_at: new Date().toISOString() }); });
 
-        // User
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
             state.user = user;
@@ -210,7 +205,6 @@
         }
 
         loadDB();
-        // Уменьшил частоту опроса базы для снижения лагов, но оставил чат быстрым
         setInterval(loadDB, 5000);
         setInterval(loadMessages, 3000);
         startMuteChecker();
@@ -225,7 +219,6 @@
         document.getElementById('profileNameBig').textContent = state.profile.username;
     }
 
-    // AUTH
     async function handleAuth() {
         const email = document.getElementById('authEmail').value;
         const pass = document.getElementById('authPassword').value;
@@ -248,7 +241,6 @@
     }
     function toggleAuthMode() { authMode = authMode === 'login' ? 'register' : 'login'; document.getElementById('authTitle').textContent = authMode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ'; }
 
-    // CHAT
     function startMuteChecker() {
         if (muteInterval) clearInterval(muteInterval);
         muteInterval = setInterval(() => {
@@ -293,7 +285,6 @@
         document.getElementById('chatMessages').innerHTML = data.reverse().map(m => {
             if (m.is_deleted && !state.isAdmin) return '';
             const isDel = m.is_deleted && state.isAdmin;
-            // Ник обычного юзера розовый, админа - градиент. Текст - белый.
             return `
             <div class="flex gap-2 mb-2 group items-start">
                 <img src="${m.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10">
@@ -320,34 +311,45 @@
     async function modDel(id) { await supabaseClient.from('messages').update({ is_deleted: true }).eq('id', id); loadMessages(); }
     async function modBan(uid, ban) { await supabaseClient.from('profiles').update({ is_banned: ban }).eq('id', uid); }
 
-    // ADMIN DB
+    // --- DB & ADMIN SYNC ---
     async function loadDB() {
         const { data } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single();
         if (!data) return;
         
-        // Оптимизация: обновляем DOM только если данные изменились
-        if (state.isLive !== data.is_live || state.streamName !== data.stream_name || state.schedule !== data.schedule) {
-            state.isLive = data.is_live;
-            state.streamName = data.stream_name;
-            state.banners = data.banners || [];
-            state.schedule = data.schedule || '';
+        state.isLive = data.is_live;
+        state.streamName = data.stream_name;
+        state.banners = data.banners || [];
+        state.schedule = data.schedule || '';
 
-            document.getElementById('streamNameDisplay').textContent = state.streamName;
-            document.getElementById('statusDot').className = state.isLive ? "w-1.5 h-1.5 bg-red-500 animate-pulse rounded-full" : "w-1.5 h-1.5 bg-gray-600 rounded-full";
-            document.getElementById('statusText').textContent = state.isLive ? "В ЭФИРЕ" : "ОФФЛАЙН";
-            document.getElementById('statusText').className = `text-[9px] font-black uppercase ${state.isLive ? 'text-red-500' : 'text-gray-500'} tracking-[0.2em] font-stream`;
+        // Обновляем плеер и информацию
+        document.getElementById('streamNameDisplay').textContent = state.streamName;
+        document.getElementById('statusDot').className = state.isLive ? "w-1.5 h-1.5 bg-red-500 animate-pulse rounded-full" : "w-1.5 h-1.5 bg-gray-600 rounded-full";
+        document.getElementById('statusText').textContent = state.isLive ? "В ЭФИРЕ" : "ОФФЛАЙН";
+        document.getElementById('statusText').className = `text-[9px] font-black uppercase ${state.isLive ? 'text-red-500' : 'text-gray-500'} tracking-[0.2em] font-stream`;
+        
+        const btn = document.getElementById('liveToggleBtn');
+        btn.textContent = state.isLive ? "🔴 ОСТАНОВИТЬ" : "⚪ ЗАПУСТИТЬ";
+        btn.className = `w-full py-5 rounded-2xl font-black transition text-xl uppercase italic ${state.isLive ? 'bg-red-600' : 'bg-green-600'}`;
+
+        document.getElementById('scheduleContainer').innerHTML = state.schedule.split('\n').filter(l=>l.trim()).map(l => `<div class="bg-white/5 p-3 rounded-xl border border-white/5 text-gray-300 font-stream">${l}</div>`).join('') || '<div class="opacity-30 text-[10px]">Нет программы</div>';
+        document.getElementById('bannersContainer').innerHTML = state.banners.map(b => `
+            <a href="${b.url}" target="_blank" class="banner-card block hover:scale-[1.02] transition">
+                <img src="${b.img}" class="w-full aspect-video object-cover">
+                <div class="p-4"><h4 class="text-pink-500 font-bold text-xs uppercase mb-1">${b.title}</h4><p class="text-[10px] text-gray-500 font-stream">${b.desc}</p></div>
+            </a>
+        `).join('');
+
+        // !!! АВТОЗАПОЛНЕНИЕ АДМИНКИ ПРИ ПЕРЕЗАГРУЗКЕ !!!
+        if (state.isAdmin && !areInputsPopulated) {
+            document.getElementById('streamNameInput').value = state.streamName;
+            document.getElementById('scheduleTextarea').value = state.schedule;
             
-            const btn = document.getElementById('liveToggleBtn');
-            btn.textContent = state.isLive ? "🔴 ОСТАНОВИТЬ" : "⚪ ЗАПУСТИТЬ";
-            btn.className = `w-full py-5 rounded-2xl font-black transition text-xl uppercase italic ${state.isLive ? 'bg-red-600' : 'bg-green-600'}`;
-
-            document.getElementById('scheduleContainer').innerHTML = state.schedule.split('\n').filter(l=>l.trim()).map(l => `<div class="bg-white/5 p-3 rounded-xl border border-white/5 text-gray-300 font-stream">${l}</div>`).join('') || '<div class="opacity-30 text-[10px]">Нет программы</div>';
-            document.getElementById('bannersContainer').innerHTML = state.banners.map(b => `
-                <a href="${b.url}" target="_blank" class="banner-card block hover:scale-[1.02] transition">
-                    <img src="${b.img}" class="w-full aspect-video object-cover">
-                    <div class="p-4"><h4 class="text-pink-500 font-bold text-xs uppercase mb-1">${b.title}</h4><p class="text-[10px] text-gray-500 font-stream">${b.desc}</p></div>
-                </a>
-            `).join('');
+            // Восстанавливаем баннеры в админке
+            const list = document.getElementById('adminBannersList');
+            if (list.children.length === 0) {
+                state.banners.forEach(b => addBanner(b));
+            }
+            areInputsPopulated = true;
         }
     }
 
@@ -357,24 +359,11 @@
             img: el.querySelector('.b-img').value, title: el.querySelector('.b-title').value,
             desc: el.querySelector('.b-desc').value, url: el.querySelector('.b-url').value
         }));
-        
         const newName = document.getElementById('streamNameInput').value;
         const newSched = document.getElementById('scheduleTextarea').value;
 
-        // Используем upsert чтобы создать строку если ее нет
-        const { error } = await supabaseClient.from('site_settings').upsert({ 
-            id: 1,
-            is_live: state.isLive, 
-            stream_name: newName,
-            schedule: newSched,
-            banners: newBanners
-        });
-        
-        if (error) alert("Ошибка сохранения: " + error.message);
-        else {
-            alert("Сохранено!");
-            loadDB(); // Сразу обновить локально
-        }
+        await supabaseClient.from('site_settings').upsert({ id: 1, is_live: state.isLive, stream_name: newName, schedule: newSched, banners: newBanners });
+        alert("Сохранено!"); loadDB();
     }
 
     async function uploadBannerImg(inp, inputId, previewId) {
@@ -410,11 +399,12 @@
         document.getElementById('adminBannersList').appendChild(div);
     }
 
-    // UTILS
     function handlePlayButtonClick() {
         if (state.isLive) {
+            const host = window.location.hostname || 'localhost';
+            // Добавил muted=true и parent, чтобы избежать черного экрана
             const iframe = document.getElementById('streamIframe');
-            iframe.src = `https://player.twitch.tv/?channel=livenet_&parent=${window.location.hostname || 'localhost'}`;
+            iframe.src = `https://player.twitch.tv/?channel=livenet_&parent=${host}&muted=true`;
             iframe.classList.remove('hide');
             document.getElementById('playButton').classList.add('hide');
             document.getElementById('offlineState').classList.add('hide');
@@ -428,7 +418,10 @@
         document.getElementById('homeView').classList.toggle('hide', v !== 'home');
         document.getElementById('playerView').classList.toggle('hide', v !== 'player');
         document.getElementById('adminView').classList.toggle('hide', v !== 'admin');
-        if (v !== 'player') { document.getElementById('streamIframe').src = ""; }
+        if (v !== 'player') { 
+            const iframe = document.getElementById('streamIframe');
+            iframe.src = ""; // Очищаем iframe при уходе со страницы, чтобы не грузил фон
+        }
         window.scrollTo(0,0);
     }
     
@@ -439,6 +432,8 @@
             document.getElementById('mainMenuAdminBtn').classList.remove('hide');
             document.getElementById('adminLoginIcon').classList.add('hide');
             showView('admin'); 
+            areInputsPopulated = false; // Сбрасываем флаг, чтобы при входе данные подтянулись
+            loadDB();
         } else alert("Неверный пароль!"); 
     }
 
@@ -450,16 +445,8 @@
     }
     
     async function toggleLive() { state.isLive = !state.isLive; await supabaseClient.from('site_settings').upsert({ id: 1, is_live: state.isLive }); loadDB(); }
-
     async function editNick() { const n = prompt("Новый ник:", state.profile.username); if (n && n.trim()) { await supabaseClient.from('profiles').update({ username: n }).eq('id', state.user.id); location.reload(); } }
-    async function uploadAvatar(inp) {
-        const file = inp.files[0]; if(!file) return;
-        const name = `ava-${state.user.id}.png`;
-        await supabaseClient.storage.from('avatars').upload(name, file, {upsert:true});
-        const { data: { publicUrl } } = supabaseClient.storage.from('avatars').getPublicUrl(name);
-        await supabaseClient.from('profiles').update({ avatar_url: publicUrl }).eq('id', state.user.id);
-        location.reload();
-    }
+    async function uploadAvatar(inp) { const file = inp.files[0]; if(!file) return; const name = `ava-${state.user.id}.png`; await supabaseClient.storage.from('avatars').upload(name, file, {upsert:true}); const { data: { publicUrl } } = supabaseClient.storage.from('avatars').getPublicUrl(name); await supabaseClient.from('profiles').update({ avatar_url: publicUrl }).eq('id', state.user.id); location.reload(); }
 
     function openPasswordModal() { document.getElementById('passwordModal').classList.remove('hide'); }
     function openProfileModal() { if(!state.user) openAuth(); else document.getElementById('profileModal').classList.remove('hide'); }
