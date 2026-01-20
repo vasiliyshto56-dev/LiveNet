@@ -41,10 +41,13 @@
     .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
     @keyframes ticker { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-    /* Скроллбар (СЕРЫЙ ВМЕСТО ФИОЛЕТОВОГО) */
+    /* Скроллбар */
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; } /* Теперь серый */
+    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; } 
     ::-webkit-scrollbar-track { background: #1f2937; }
+
+    /* Стиль закрепа */
+    .pinned-msg { background: rgba(236, 72, 153, 0.15); border-left: 3px solid #ec4899; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#0a0514]">
@@ -111,8 +114,21 @@
            <h2 id="streamNameDisplay" class="text-lg font-stream uppercase italic">LiveNet</h2>
         </div>
         <div class="side-panel"><h3 class="text-[9px] font-black uppercase text-gray-500 mb-4 tracking-[0.3em] font-stream italic">ПРОГРАММА</h3><div id="scheduleContainer" class="space-y-2 font-stream text-[11px]"></div></div>
+        
         <div class="side-panel flex flex-col h-[400px]">
             <h3 class="text-[9px] font-black uppercase text-pink-500 mb-4 tracking-[0.3em] font-stream italic">ЧАТ</h3>
+            
+            <div id="pinnedMessageContainer" class="pinned-msg hide">
+                <div class="text-xs overflow-hidden">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-[9px] font-bold bg-pink-600 px-1 rounded uppercase">Pin</span>
+                        <span id="pinnedAuthor" class="font-bold text-pink-400 truncate"></span>
+                    </div>
+                    <div id="pinnedText" class="text-white break-all"></div>
+                </div>
+                <button id="unpinBtn" onclick="unpinMsg()" class="hide text-gray-400 hover:text-white px-2">✕</button>
+            </div>
+
             <div id="chatMessages" class="flex-1 overflow-y-auto space-y-2 mb-4 text-[12px] font-stream pr-1"></div>
             <div id="chatInputArea" class="mb-2"></div>
         </div>
@@ -305,7 +321,6 @@
     }
 
     function closeChat() {
-        // УНИВЕРСАЛЬНОЕ ЗАКРЫТИЕ ДИАЛОГА (СТРЕЛКА)
         document.getElementById('dialogsColumn').classList.remove('hidden');
         document.getElementById('chatColumn').classList.add('hidden');
         document.getElementById('chatColumn').classList.remove('flex');
@@ -486,7 +501,7 @@
     }
     function toggleAuthMode() { authMode = authMode === 'login' ? 'register' : 'login'; document.getElementById('authTitle').textContent = authMode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ'; document.getElementById('authStep1').classList.remove('hide'); document.getElementById('authStep2').classList.add('hide'); }
 
-    // --- CHAT & DB & MUTE ---
+    // --- CHAT & DB & PIN SYSTEM ---
     async function sendMsg() { 
         const inp = document.getElementById('msgInp'); 
         const txt = inp.value.trim();
@@ -497,15 +512,73 @@
         await supabaseClient.from('messages').insert([{ username: state.profile.username, text: txt, user_id: state.user.id, avatar_url: state.profile.avatar_url, is_admin: state.isAdmin }]); 
         loadMessages(); 
     }
-    async function loadMessages() { const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false }).limit(40); if (!data) return; document.getElementById('chatMessages').innerHTML = data.reverse().map(m => { if (m.is_deleted && !state.isAdmin) return ''; const isDel = m.is_deleted && state.isAdmin; return `<div class="flex gap-2 mb-2 group items-start"><button onclick="openUserProfile('${m.user_id}')" class="hover:opacity-70 transition"><img src="${m.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10"></button><div class="flex-1 min-w-0"><button onclick="openUserProfile('${m.user_id}')" class="hover:underline text-left"><span class="${m.is_admin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${m.username}:</span></button><span class="text-white ml-1 break-all text-xs ${isDel ? 'deleted-msg' : ''}">${isDel ? '(Удалено) ' + m.text : m.text}</span></div>${state.isAdmin && !m.is_deleted ? `<div class="opacity-0 group-hover:opacity-100 flex gap-1 transition"><button onclick="modDel('${m.id}')" title="Удалить">🗑️</button><button onclick="modMute('${m.user_id}', true)" title="Мут">🔇</button><button onclick="modBan('${m.user_id}', true)" title="Бан">🚫</button></div>` : ''}</div>`; }).join(''); const chat = document.getElementById('chatMessages'); if(chat.dataset.scrolled !== "true") chat.scrollTop = chat.scrollHeight; }
+    
+    async function loadMessages() { 
+        const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false }).limit(40); 
+        if (!data) return; 
+        document.getElementById('chatMessages').innerHTML = data.reverse().map(m => { 
+            if (m.is_deleted && !state.isAdmin) return ''; 
+            const isDel = m.is_deleted && state.isAdmin; 
+            // Escape Quotes for safe inline JS
+            const safeText = m.text.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+            
+            return `
+            <div class="flex gap-2 mb-2 group items-start">
+                <button onclick="openUserProfile('${m.user_id}')" class="hover:opacity-70 transition">
+                    <img src="${m.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10">
+                </button>
+                <div class="flex-1 min-w-0">
+                    <button onclick="openUserProfile('${m.user_id}')" class="hover:underline text-left">
+                        <span class="${m.is_admin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${m.username}:</span>
+                    </button>
+                    <span class="text-white ml-1 break-all text-xs ${isDel ? 'deleted-msg' : ''}">${isDel ? '(Удалено) ' + m.text : m.text}</span>
+                </div>
+                ${state.isAdmin && !m.is_deleted ? `
+                    <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition">
+                        <button onclick="pinMsg('${m.username}', '${safeText}')" title="Закрепить">📌</button>
+                        <button onclick="modDel('${m.id}')" title="Удалить">🗑️</button>
+                        <button onclick="modMute('${m.user_id}', true)" title="Мут">🔇</button>
+                        <button onclick="modBan('${m.user_id}', true)" title="Бан">🚫</button>
+                    </div>
+                ` : ''}
+            </div>`; 
+        }).join(''); 
+        const chat = document.getElementById('chatMessages'); 
+        if(chat.dataset.scrolled !== "true") chat.scrollTop = chat.scrollHeight; 
+    }
+
+    async function pinMsg(author, text) {
+        if(!confirm('Закрепить сообщение?')) return;
+        await supabaseClient.from('site_settings').update({ pinned_text: text, pinned_author: author }).eq('id', 1);
+        loadDB();
+    }
+
+    async function unpinMsg() {
+        if(!confirm('Убрать закреп?')) return;
+        await supabaseClient.from('site_settings').update({ pinned_text: null, pinned_author: null }).eq('id', 1);
+        loadDB();
+    }
+
     async function modMute(uid, mute) { const until = mute ? new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() : null; await supabaseClient.from('profiles').update({ muted_until: until }).eq('id', uid); }
     async function modDel(id) { await supabaseClient.from('messages').update({ is_deleted: true }).eq('id', id); loadMessages(); }
     async function modBan(uid, ban) { await supabaseClient.from('profiles').update({ is_banned: ban }).eq('id', uid); }
+    
     function startMuteChecker() { if (muteInterval) clearInterval(muteInterval); muteInterval = setInterval(() => { const area = document.getElementById('chatInputArea'); if (!state.user) { area.innerHTML = `<button onclick="openAuth()" class="w-full py-3 border border-dashed border-white/20 rounded-xl text-[10px] opacity-50 uppercase font-bold">Войти в аккаунт</button>`; return; } if (state.profile?.is_banned) { area.innerHTML = `<div class="bg-red-900/20 text-red-500 font-bold text-center text-[10px] py-2 rounded-xl">ВЫ ЗАБАНЕНЫ</div>`; } else { if (!area.querySelector('input')) { area.innerHTML = `<div class="flex gap-2"><input id="msgInp" onkeydown="if(event.key==='Enter') sendMsg()" class="flex-1 bg-white/5 p-3 rounded-xl outline-none text-xs text-white placeholder-gray-600" placeholder="Сообщение..."><button onclick="sendMsg()" class="bg-pink-600 px-4 rounded-xl font-bold">></button></div>`; } } }, 1000); }
+    
     async function loadDB() { 
         const { data } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single(); if (!data) return; 
         state.isLive = data.is_live; state.streamName = data.stream_name; state.banners = data.banners || []; state.schedule = data.schedule || ''; 
         
+        // Pinned Message Logic
+        if (data.pinned_text) {
+            document.getElementById('pinnedMessageContainer').classList.remove('hide');
+            document.getElementById('pinnedAuthor').textContent = data.pinned_author;
+            document.getElementById('pinnedText').textContent = data.pinned_text;
+            if(state.isAdmin) document.getElementById('unpinBtn').classList.remove('hide');
+        } else {
+            document.getElementById('pinnedMessageContainer').classList.add('hide');
+        }
+
         if (!state.isLive) {
             document.getElementById('streamIframe').src = "";
             document.getElementById('streamIframe').classList.add('hide');
