@@ -35,11 +35,14 @@
     .vote-btn.active-like { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #10B981; }
     .vote-btn.active-dislike { background: rgba(239, 68, 68, 0.2); border-color: #EF4444; color: #EF4444; }
 
-    /* Бегущая строка (Ускоренная и оптимизированная) */
+    /* Бегущая строка (Классическая, без дублей) */
     .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 40px; display: flex; align-items: center; position: relative; }
-    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 40s linear infinite; } /* Увеличил время, но контент будет длиннее */
-    .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 0; }
-    @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } } /* Бесконечный цикл через дублирование */
+    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 25s linear infinite; }
+    .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
+    @keyframes ticker { 
+        0% { transform: translate3d(100vw, 0, 0); } /* Начинаем за правым краем экрана */
+        100% { transform: translate3d(-100%, 0, 0); } /* Уезжаем влево полностью */
+    }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
@@ -89,8 +92,7 @@
         </div>
         <div class="ticker-wrap rounded-b-2xl border-x-2 border-b-2 border-pink-500/30">
             <div class="ticker">
-                <span id="newsTickerDisplay" class="ticker-item">Загрузка...</span>
-                <span id="newsTickerDisplayDuplicate" class="ticker-item"></span>
+                <div id="newsTickerDisplay" class="ticker-item">Загрузка...</div>
             </div>
         </div>
       </div>
@@ -265,7 +267,8 @@
             }
             state.profile = prof;
             renderProfile();
-            setInterval(checkUnreadMessages, 2000);
+            requestNotificationPermission();
+            setInterval(checkUnreadMessages, 2000); 
         }
         
         if (state.isAdmin) {
@@ -289,14 +292,12 @@
         document.getElementById('messengerBtn').classList.remove('hide');
     }
 
-    // --- NOTIFICATIONS ---
     function enableNotifications() {
         if (Notification.permission !== "granted") {
             Notification.requestPermission();
         }
     }
 
-    // --- MESSENGER LOGIC ---
     async function openMessenger() {
         if(!state.user) return openAuth();
         enableNotifications();
@@ -367,8 +368,6 @@
             return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}">${m.text}</div></div>`;
         }).join('');
         container.scrollTop = container.scrollHeight;
-        
-        // Mark as read if opened
         if (msgs.length > 0) {
              await supabaseClient.from('direct_messages').update({ is_read: true }).eq('receiver_id', state.user.id).eq('sender_id', state.activeChatUser);
         }
@@ -378,12 +377,10 @@
         const inp = document.getElementById('dmInput');
         const text = inp.value.trim();
         if (!text || !state.activeChatUser) return;
-        
         const container = document.getElementById('dmMessages');
         container.innerHTML += `<div class="flex justify-end"><div class="msg-bubble msg-sent">${text}</div></div>`;
         container.scrollTop = container.scrollHeight;
         inp.value = '';
-
         await supabaseClient.from('direct_messages').insert([{ sender_id: state.user.id, receiver_id: state.activeChatUser, text: text }]);
         fetchMessages(); 
     }
@@ -395,9 +392,13 @@
         
         if (count > 0) {
             dot.classList.remove('hide');
-            if (count > state.lastUnreadCount) {
-                // New message arrived!
-                try { document.getElementById('notifSound').play(); } catch(e){}
+            // Звук только если новое сообщение И окно мессенджера ЗАКРЫТО
+            if (count > state.lastUnreadCount && document.getElementById('messengerModal').classList.contains('hide')) {
+                try { 
+                    const audio = document.getElementById('notifSound');
+                    audio.volume = 0.1; // ТИХИЙ ЗВУК
+                    audio.play(); 
+                } catch(e){}
                 if (Notification.permission === "granted") {
                     new Notification("LiveNet", { body: "У вас новое сообщение!", icon: "https://cdn-icons-png.flaticon.com/512/1041/1041916.png" });
                 }
@@ -478,7 +479,7 @@
         const pass = document.getElementById('authPassword').value;
         const errEl = document.getElementById('emailError'); errEl.classList.add('hide');
         if (!email || !pass) return alert("Заполни все поля!");
-        enableNotifications(); // Ask on click
+        enableNotifications(); 
         if (authMode === 'register') {
             const { data: isBusy } = await supabaseClient.rpc('check_email', { email_to_check: email });
             if (isBusy) { errEl.classList.remove('hide'); return; }
@@ -534,13 +535,10 @@
              }
         }
 
-        // Ticker Logic with Duplication
+        // Ticker Logic (Reverted to single instance)
         if (data.news_ticker && data.news_ticker !== state.ticker) { 
             state.ticker = data.news_ticker;
-            // Дублируем текст много раз
-            const fullText = (state.ticker + "  ✦  ").repeat(10);
-            document.getElementById('newsTickerDisplay').textContent = fullText;
-            document.getElementById('newsTickerDisplayDuplicate').textContent = fullText;
+            document.getElementById('newsTickerDisplay').textContent = state.ticker;
         } 
         document.getElementById('streamNameDisplay').textContent = state.streamName; document.getElementById('statusDot').className = state.isLive ? "w-1.5 h-1.5 bg-red-500 animate-pulse rounded-full" : "w-1.5 h-1.5 bg-gray-600 rounded-full"; document.getElementById('statusText').textContent = state.isLive ? "В ЭФИРЕ" : "ОФФЛАЙН"; document.getElementById('statusText').className = `text-[9px] font-black uppercase ${state.isLive ? 'text-red-500' : 'text-gray-500'} tracking-[0.2em] font-stream`; const btn = document.getElementById('liveToggleBtn'); btn.textContent = state.isLive ? "🔴 ОСТАНОВИТЬ" : "⚪ ЗАПУСТИТЬ"; btn.className = `w-full py-5 rounded-2xl font-black transition text-xl uppercase italic ${state.isLive ? 'bg-red-600' : 'bg-green-600'}`; document.getElementById('scheduleContainer').innerHTML = state.schedule.split('\n').filter(l=>l.trim()).map(l => `<div class="bg-white/5 p-3 rounded-xl border border-white/5 text-gray-300 font-stream">${l}</div>`).join('') || '<div class="opacity-30 text-[10px]">Нет программы</div>'; document.getElementById('bannersContainer').innerHTML = state.banners.map(b => `<a href="${b.url}" target="_blank" class="banner-card block hover:scale-[1.02] transition"><img src="${b.img}" class="w-full aspect-video object-cover"><div class="p-4"><h4 class="text-pink-500 font-bold text-xs uppercase mb-1">${b.title}</h4><p class="text-[10px] text-gray-500 font-stream">${b.desc}</p></div></a>`).join(''); if (state.isAdmin && !areInputsPopulated) { document.getElementById('streamNameInput').value = state.streamName; document.getElementById('scheduleTextarea').value = state.schedule; document.getElementById('tickerInput').value = state.ticker; const list = document.getElementById('adminBannersList'); if (list.children.length === 0) state.banners.forEach(b => addBanner(b)); areInputsPopulated = true; } 
     }
