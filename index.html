@@ -35,49 +35,58 @@
     .vote-btn.active-like { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #10B981; }
     .vote-btn.active-dislike { background: rgba(239, 68, 68, 0.2); border-color: #EF4444; color: #EF4444; }
 
-    /* Бегущая строка (Классическая, без дублей) */
+    /* Бегущая строка (Линейная, без пауз) */
     .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 40px; display: flex; align-items: center; position: relative; }
-    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 25s linear infinite; }
+    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 30s linear infinite; }
     .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
     @keyframes ticker { 
-        0% { transform: translate3d(100vw, 0, 0); } /* Начинаем за правым краем экрана */
-        100% { transform: translate3d(-100%, 0, 0); } /* Уезжаем влево полностью */
+        0% { transform: translate3d(100vw, 0, 0); } 
+        100% { transform: translate3d(-100%, 0, 0); } 
     }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-[#0a0514]">
 
-  <div id="homeView" class="flex-grow flex flex-col items-center justify-center relative min-h-screen">
+  <div id="homeView" class="flex-grow flex flex-col items-center justify-start pt-24 pb-10 relative min-h-screen overflow-y-auto h-screen">
     
-    <div class="absolute top-6 left-8 flex gap-3 z-20">
-        <button id="userProfileBtn" onclick="openMyProfile(); enableNotifications();" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
+    <div class="absolute top-6 left-8 flex gap-3 z-50">
+        <button id="userProfileBtn" onclick="openMyProfile()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
             <div id="miniAvatar" class="w-5 h-5 rounded-full bg-pink-500 overflow-hidden hide"><img id="miniAvatarImg" src="" class="w-full h-full object-cover"></div>
             <span id="topBarUser">Войти</span>
         </button>
         
-        <button id="messengerBtn" onclick="openMessenger(); enableNotifications();" class="hide bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 relative transition backdrop-blur-md">
+        <button id="messengerBtn" onclick="openMessenger()" class="hide bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 relative transition backdrop-blur-md">
             📩
             <div id="unreadDot" class="hide absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
         </button>
     </div>
     
-    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl z-20" title="Вход админа">🛡️</button>
+    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl z-50" title="Вход админа">🛡️</button>
 
-    <h1 class="text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase">LiveNet</h1>
-    
-    <div class="flex flex-col gap-4 w-full max-w-xs">
-      <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg">▶ СМОТРЕТЬ ЭФИР</button>
-      <a href="https://t.me/livenet_official" target="_blank" class="py-5 bg-[#229ED9] rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic text-center shadow-lg">TELEGRAM</a>
-      <button id="mainMenuAdminBtn" onclick="showView('admin')" class="hide py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px] tracking-widest border border-white/10 mt-2 hover:bg-white/10 text-pink-500">⚙️ Админ панель</button>
+    <div class="flex flex-col items-center justify-center min-h-[50vh] w-full">
+        <h1 class="text-6xl md:text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase text-center">LiveNet</h1>
+        
+        <div class="flex flex-col gap-4 w-full max-w-xs px-4">
+          <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg w-full">▶ СМОТРЕТЬ ЭФИР</button>
+          <a href="https://t.me/livenet_official" target="_blank" class="py-5 bg-[#229ED9] rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic text-center shadow-lg w-full block">TELEGRAM</a>
+          <button id="mainMenuAdminBtn" onclick="showView('admin')" class="hide py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px] tracking-widest border border-white/10 mt-2 hover:bg-white/10 text-pink-500 w-full">⚙️ Админ панель</button>
+        </div>
     </div>
 
-    <div class="absolute bottom-8 text-[10px] text-gray-600 font-bold uppercase tracking-widest">© Copyright LiveNet 2026</div>
+    <div class="w-full max-w-[1700px] mx-auto mt-12 px-4 pb-10">
+        <h3 class="text-[10px] font-black uppercase text-gray-600 mb-8 tracking-[0.4em] italic flex items-center gap-2 justify-center md:justify-start">
+            <span class="w-1 h-4 bg-pink-600"></span> ИНФОРМАЦИЯ/ПАРТНЕРЫ
+        </h3>
+        <div id="bannersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    </div>
+
+    <div class="mt-auto text-[10px] text-gray-600 font-bold uppercase tracking-widest py-4">© Copyright LiveNet 2026</div>
   </div>
 
-  <div id="playerView" class="hide p-4 md:p-8 flex-grow">
+  <div id="playerView" class="hide p-4 md:p-8 flex-grow h-screen overflow-y-auto">
     <button onclick="showView('home')" class="mb-6 opacity-50 hover:opacity-100 transition flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">◄ МЕНЮ</button>
 
     <div class="max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-8">
@@ -124,7 +133,6 @@
         </div>
       </div>
     </div>
-    <div class="max-w-[1700px] mx-auto mt-16 pb-10"><h3 class="text-[10px] font-black uppercase text-gray-600 mb-8 tracking-[0.4em] italic flex items-center gap-2"><span class="w-1 h-4 bg-pink-600"></span> ИНФОРМАЦИЯ/ПАРТНЕРЫ</h3><div id="bannersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div></div>
   </div>
 
   <div id="messengerModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[140]">
@@ -151,11 +159,11 @@
       </div>
   </div>
 
-  <div id="userProfileView" class="hide flex-grow flex flex-col items-center pt-10 min-h-screen">
-      <button onclick="showView('player')" class="absolute top-8 left-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500 hover:scale-105 transition">◄ Назад к эфиру</button>
-      <button onclick="showView('home')" class="absolute top-8 right-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500 hover:scale-105 transition">Главное меню ►</button>
+  <div id="userProfileView" class="hide flex-grow flex flex-col items-center pt-10 min-h-screen overflow-y-auto">
+      <button onclick="showView('player')" class="absolute top-8 left-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500 hover:scale-105 transition z-50">◄ Назад к эфиру</button>
+      <button onclick="showView('home')" class="absolute top-8 right-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500 hover:scale-105 transition z-50">Главное меню ►</button>
 
-      <div class="w-full max-w-2xl bg-[#160d24] rounded-3xl overflow-hidden border border-white/5 shadow-2xl mt-10">
+      <div class="w-full max-w-2xl bg-[#160d24] rounded-3xl overflow-hidden border border-white/5 shadow-2xl mt-16 md:mt-10 mx-4">
           <div class="profile-header flex flex-col items-center justify-center">
               <div class="w-24 h-24 bg-pink-600 mx-auto rounded-full mb-4 overflow-hidden border-4 border-white/5 relative group">
                   <img id="viewUserAvatar" src="" class="w-full h-full object-cover">
@@ -178,7 +186,7 @@
       </div>
   </div>
 
-  <div id="adminView" class="hide min-h-screen p-8 bg-[#050208]">
+  <div id="adminView" class="hide min-h-screen p-8 bg-[#050208] overflow-y-auto">
     <div class="max-w-xl mx-auto">
       <div class="flex justify-between items-center mb-10">
         <h2 class="text-2xl font-black italic uppercase text-pink-500">УПРАВЛЕНИЕ</h2>
@@ -202,7 +210,7 @@
     </div>
   </div>
 
-  <div id="passwordModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[100]">
+  <div id="passwordModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[150]">
       <div class="bg-[#160d24] p-8 rounded-[30px] w-64 border border-white/10 text-center relative">
           <button onclick="document.getElementById('passwordModal').classList.add('hide')" class="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
           <h3 class="text-pink-500 font-bold mb-4 uppercase text-xs">Пароль админа</h3>
@@ -211,7 +219,7 @@
       </div>
   </div>
 
-  <div id="authModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[110]">
+  <div id="authModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[150]">
       <div class="bg-[#160d24] p-8 rounded-[30px] w-72 border border-white/10 text-center relative">
           <button onclick="closeModals()" class="absolute top-4 right-4 opacity-30 hover:opacity-100">✕</button>
           <div id="authStep1">
@@ -231,8 +239,6 @@
           </div>
       </div>
   </div>
-
-  <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
   <script>
     const SUPABASE_URL = "https://mqcakdxhkwugckvuqygs.supabase.co";
@@ -267,7 +273,6 @@
             }
             state.profile = prof;
             renderProfile();
-            requestNotificationPermission();
             setInterval(checkUnreadMessages, 2000); 
         }
         
@@ -292,15 +297,8 @@
         document.getElementById('messengerBtn').classList.remove('hide');
     }
 
-    function enableNotifications() {
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-    }
-
     async function openMessenger() {
         if(!state.user) return openAuth();
-        enableNotifications();
         document.getElementById('messengerModal').classList.remove('hide');
         document.getElementById('dialogsColumn').classList.remove('hidden');
         document.getElementById('chatColumn').classList.add('hidden');
@@ -310,7 +308,6 @@
 
     async function openMessengerWithUser() {
         if(!state.user) return openAuth();
-        enableNotifications();
         document.getElementById('messengerModal').classList.remove('hide');
         loadChat(viewProfile.id, viewProfile.username, viewProfile.avatar);
     }
@@ -392,17 +389,7 @@
         
         if (count > 0) {
             dot.classList.remove('hide');
-            // Звук только если новое сообщение И окно мессенджера ЗАКРЫТО
-            if (count > state.lastUnreadCount && document.getElementById('messengerModal').classList.contains('hide')) {
-                try { 
-                    const audio = document.getElementById('notifSound');
-                    audio.volume = 0.1; // ТИХИЙ ЗВУК
-                    audio.play(); 
-                } catch(e){}
-                if (Notification.permission === "granted") {
-                    new Notification("LiveNet", { body: "У вас новое сообщение!", icon: "https://cdn-icons-png.flaticon.com/512/1041/1041916.png" });
-                }
-            }
+            // NO SOUND, NO NOTIFICATION API, JUST VISUAL DOT
         } else {
             dot.classList.add('hide');
         }
@@ -479,7 +466,6 @@
         const pass = document.getElementById('authPassword').value;
         const errEl = document.getElementById('emailError'); errEl.classList.add('hide');
         if (!email || !pass) return alert("Заполни все поля!");
-        enableNotifications(); 
         if (authMode === 'register') {
             const { data: isBusy } = await supabaseClient.rpc('check_email', { email_to_check: email });
             if (isBusy) { errEl.classList.remove('hide'); return; }
