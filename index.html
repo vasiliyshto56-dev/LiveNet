@@ -35,24 +35,25 @@
     .vote-btn.active-like { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #10B981; }
     .vote-btn.active-dislike { background: rgba(239, 68, 68, 0.2); border-color: #EF4444; color: #EF4444; }
 
-    /* Бегущая строка (Линейная, без пауз) */
+    /* Бегущая строка (Исправленная: Плавная и Линейная) */
     .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 40px; display: flex; align-items: center; position: relative; }
-    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 30s linear infinite; }
+    .ticker { white-space: nowrap; position: absolute; animation: ticker 20s linear infinite; }
     .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
+    
     @keyframes ticker { 
-        0% { transform: translate3d(100vw, 0, 0); } 
-        100% { transform: translate3d(-100%, 0, 0); } 
+        0% { transform: translateX(100vw); } 
+        100% { transform: translateX(-100%); } 
     }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#0a0514]">
+<body class="min-h-screen flex flex-col">
 
-  <div id="homeView" class="flex-grow flex flex-col items-center justify-start pt-24 pb-10 relative min-h-screen overflow-y-auto h-screen">
+  <div id="homeView" class="flex-grow flex flex-col items-center justify-center relative min-h-screen py-20">
     
-    <div class="absolute top-6 left-8 flex gap-3 z-50">
+    <div class="absolute top-6 left-8 flex gap-3 z-20">
         <button id="userProfileBtn" onclick="openMyProfile()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
             <div id="miniAvatar" class="w-5 h-5 rounded-full bg-pink-500 overflow-hidden hide"><img id="miniAvatarImg" src="" class="w-full h-full object-cover"></div>
             <span id="topBarUser">Войти</span>
@@ -64,29 +65,27 @@
         </button>
     </div>
     
-    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl z-50" title="Вход админа">🛡️</button>
+    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl z-20" title="Вход админа">🛡️</button>
 
-    <div class="flex flex-col items-center justify-center min-h-[50vh] w-full">
-        <h1 class="text-6xl md:text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase text-center">LiveNet</h1>
-        
-        <div class="flex flex-col gap-4 w-full max-w-xs px-4">
-          <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg w-full">▶ СМОТРЕТЬ ЭФИР</button>
-          <a href="https://t.me/livenet_official" target="_blank" class="py-5 bg-[#229ED9] rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic text-center shadow-lg w-full block">TELEGRAM</a>
-          <button id="mainMenuAdminBtn" onclick="showView('admin')" class="hide py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px] tracking-widest border border-white/10 mt-2 hover:bg-white/10 text-pink-500 w-full">⚙️ Админ панель</button>
-        </div>
+    <h1 class="text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase text-center">LiveNet</h1>
+    
+    <div class="flex flex-col gap-4 w-full max-w-xs mb-12">
+      <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg">▶ СМОТРЕТЬ</button>
+      <a href="https://t.me/livenet_official" target="_blank" class="py-5 bg-[#229ED9] rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic text-center shadow-lg">TELEGRAM</a>
+      <button id="mainMenuAdminBtn" onclick="showView('admin')" class="hide py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px] tracking-widest border border-white/10 mt-2 hover:bg-white/10 text-pink-500">⚙️ Админ панель</button>
     </div>
 
-    <div class="w-full max-w-[1700px] mx-auto mt-12 px-4 pb-10">
+    <div class="w-full max-w-[1700px] px-4">
         <h3 class="text-[10px] font-black uppercase text-gray-600 mb-8 tracking-[0.4em] italic flex items-center gap-2 justify-center md:justify-start">
             <span class="w-1 h-4 bg-pink-600"></span> ИНФОРМАЦИЯ/ПАРТНЕРЫ
         </h3>
         <div id="bannersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
     </div>
 
-    <div class="mt-auto text-[10px] text-gray-600 font-bold uppercase tracking-widest py-4">© Copyright LiveNet 2026</div>
+    <div class="mt-12 text-[10px] text-gray-600 font-bold uppercase tracking-widest">© Copyright LiveNet 2026</div>
   </div>
 
-  <div id="playerView" class="hide p-4 md:p-8 flex-grow h-screen overflow-y-auto">
+  <div id="playerView" class="hide p-4 md:p-8 flex-grow">
     <button onclick="showView('home')" class="mb-6 opacity-50 hover:opacity-100 transition flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">◄ МЕНЮ</button>
 
     <div class="max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-8">
@@ -389,7 +388,6 @@
         
         if (count > 0) {
             dot.classList.remove('hide');
-            // NO SOUND, NO NOTIFICATION API, JUST VISUAL DOT
         } else {
             dot.classList.add('hide');
         }
@@ -521,7 +519,6 @@
              }
         }
 
-        // Ticker Logic (Reverted to single instance)
         if (data.news_ticker && data.news_ticker !== state.ticker) { 
             state.ticker = data.news_ticker;
             document.getElementById('newsTickerDisplay').textContent = state.ticker;
