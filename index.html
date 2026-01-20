@@ -35,7 +35,7 @@
     .vote-btn.active-like { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #10B981; }
     .vote-btn.active-dislike { background: rgba(239, 68, 68, 0.2); border-color: #EF4444; color: #EF4444; }
 
-    /* Бегущая строка (Линейная) */
+    /* Бегущая строка */
     .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 40px; display: flex; align-items: center; position: relative; }
     .ticker { white-space: nowrap; position: absolute; animation: ticker 30s linear infinite; }
     .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
@@ -115,7 +115,7 @@
         </div>
         <div class="side-panel"><h3 class="text-[9px] font-black uppercase text-gray-500 mb-4 tracking-[0.3em] font-stream italic">ПРОГРАММА</h3><div id="scheduleContainer" class="space-y-2 font-stream text-[11px]"></div></div>
         
-        <div class="side-panel flex flex-col h-[400px]">
+        <div class="side-panel flex flex-col h-[600px]">
             <h3 class="text-[9px] font-black uppercase text-pink-500 mb-4 tracking-[0.3em] font-stream italic">ЧАТ</h3>
             
             <div id="pinnedMessageContainer" class="pinned-msg hide">
@@ -507,7 +507,12 @@
         const txt = inp.value.trim();
         if (!txt || state.profile.is_banned) return; 
         const chat = document.getElementById('chatMessages');
+        // Optimistic UI check to avoid jump:
+        const isAtBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 100;
+        
         chat.innerHTML = `<div class="flex gap-2 mb-2 group items-start"><img src="${state.profile.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10"><div class="flex-1 min-w-0"><span class="${state.isAdmin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${state.profile.username}:</span><span class="text-white ml-1 break-all text-xs">${txt}</span></div></div>` + chat.innerHTML;
+        
+        if (isAtBottom) chat.scrollTop = chat.scrollHeight; // Force scroll only if was at bottom
         inp.value = '';
         await supabaseClient.from('messages').insert([{ username: state.profile.username, text: txt, user_id: state.user.id, avatar_url: state.profile.avatar_url, is_admin: state.isAdmin }]); 
         loadMessages(); 
@@ -516,10 +521,14 @@
     async function loadMessages() { 
         const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false }).limit(40); 
         if (!data) return; 
+        
+        const chat = document.getElementById('chatMessages');
+        // Smart scroll detection
+        const isAtBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 100;
+
         document.getElementById('chatMessages').innerHTML = data.reverse().map(m => { 
             if (m.is_deleted && !state.isAdmin) return ''; 
             const isDel = m.is_deleted && state.isAdmin; 
-            // Escape Quotes for safe inline JS
             const safeText = m.text.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
             
             return `
@@ -543,8 +552,8 @@
                 ` : ''}
             </div>`; 
         }).join(''); 
-        const chat = document.getElementById('chatMessages'); 
-        if(chat.dataset.scrolled !== "true") chat.scrollTop = chat.scrollHeight; 
+        
+        if(isAtBottom) chat.scrollTop = chat.scrollHeight; 
     }
 
     async function pinMsg(author, text) {
@@ -569,7 +578,7 @@
         const { data } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single(); if (!data) return; 
         state.isLive = data.is_live; state.streamName = data.stream_name; state.banners = data.banners || []; state.schedule = data.schedule || ''; 
         
-        // Pinned Message Logic
+        // Pinned Message
         if (data.pinned_text) {
             document.getElementById('pinnedMessageContainer').classList.remove('hide');
             document.getElementById('pinnedAuthor').textContent = data.pinned_author;
