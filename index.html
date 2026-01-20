@@ -24,9 +24,15 @@
     .status-user { color: #9ca3af; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 24px; }
     .status-admin { color: #ef4444; font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px; text-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
     
-    /* Бегущая строка (Средняя скорость) */
+    /* Стили для кнопок голосования */
+    .vote-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 99px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; transition: all 0.2s; }
+    .vote-btn:hover { background: rgba(255,255,255,0.1); }
+    .vote-btn.active-like { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #10B981; } /* Зеленый лайк */
+    .vote-btn.active-dislike { background: rgba(239, 68, 68, 0.2); border-color: #EF4444; color: #EF4444; } /* Красный дизлайк */
+
+    /* Бегущая строка */
     .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 40px; display: flex; align-items: center; position: relative; }
-    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 25s linear infinite; } /* 25s - средняя скорость */
+    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 25s linear infinite; }
     .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
     @keyframes ticker { 
         0% { transform: translate3d(100vw, 0, 0); } 
@@ -88,6 +94,16 @@
               </div>
               <div id="moscowTime" class="text-[12px] font-bold text-white font-stream uppercase">00:00:00 <span class="opacity-40 text-[9px] ml-1">(МСК)</span></div>
            </div>
+
+           <div class="flex items-center gap-3 mb-4">
+               <button id="likeBtn" onclick="handleVote('like')" class="vote-btn">
+                   <span>👍</span> <span id="likeCount">0</span>
+               </button>
+               <button id="dislikeBtn" onclick="handleVote('dislike')" class="vote-btn">
+                   <span>👎</span> <span id="dislikeCount">0</span>
+               </button>
+           </div>
+
            <div class="flex items-center gap-2 mb-1">
               <div id="statusDot" class="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
               <span id="statusText" class="text-[9px] font-black uppercase text-gray-500 tracking-[0.2em] font-stream">ОФФЛАЙН</span>
@@ -117,11 +133,11 @@
   </div>
 
   <div id="userProfileView" class="hide flex-grow flex flex-col items-center pt-10 min-h-screen">
-      <button onclick="showView('player')" class="absolute top-8 left-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">
+      <button onclick="showView('player')" class="absolute top-8 left-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500 hover:scale-105 transition">
         ◄ Назад к эфиру
       </button>
-      <button onclick="showView('home')" class="absolute top-8 right-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">
-        Домой ►
+      <button onclick="showView('home')" class="absolute top-8 right-8 flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500 hover:scale-105 transition">
+        Главное меню ►
       </button>
 
       <div class="w-full max-w-2xl bg-[#160d24] rounded-3xl overflow-hidden border border-white/5 shadow-2xl mt-10">
@@ -152,11 +168,9 @@
               <button id="subBtn" onclick="toggleSubscribe()" class="w-full max-w-xs py-3 bg-white text-black rounded-full font-bold uppercase hover:scale-105 transition shadow-lg">
                   Подписаться
               </button>
-              
               <button id="dmBtn" onclick="sendDirectMessage()" class="w-full max-w-xs py-3 bg-pink-600 text-white border border-pink-500/20 rounded-full font-bold uppercase hover:bg-pink-500 transition text-xs flex justify-center gap-2">
                   ✉️ Личное сообщение
               </button>
-
               <button id="logoutBtn" onclick="logoutUser()" class="hide w-full max-w-xs py-3 bg-red-900/20 text-red-500 border border-red-500/20 rounded-full font-bold uppercase hover:bg-red-600 hover:text-white transition text-xs">
                   ВЫЙТИ ИЗ АККАУНТА
               </button>
@@ -219,10 +233,8 @@
     const SUPABASE_KEY = "sb_publishable_h-EbNY3-ziEUt_i4PmQ1gw_cmzSR2OH"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let state = { user: null, profile: null, isLive: false, streamName: '', banners: [], schedule: '', isAdmin: false, ticker: '' };
-    // Для просмотра профиля
+    let state = { user: null, profile: null, isLive: false, streamName: '', banners: [], schedule: '', isAdmin: false, ticker: '', userVote: null };
     let viewProfile = { id: null, username: '', avatar: '', isSubscribed: false, title: null };
-
     let authMode = 'login';
     let muteInterval = null;
     let areInputsPopulated = false;
@@ -256,8 +268,10 @@
         }
 
         loadDB();
+        loadVotes(); // Загружаем лайки
         setInterval(loadDB, 3000);
         setInterval(loadMessages, 3000);
+        setInterval(loadVotes, 5000); // Обновляем лайки раз в 5 сек
         startMuteChecker();
     }
 
@@ -273,6 +287,54 @@
         openUserProfile(state.user.id);
     }
 
+    // --- VOTING SYSTEM ---
+    async function loadVotes() {
+        // 1. Считаем лайки и дизлайки
+        const { count: likes } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'like');
+        const { count: dislikes } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'dislike');
+        
+        document.getElementById('likeCount').textContent = likes || 0;
+        document.getElementById('dislikeCount').textContent = dislikes || 0;
+
+        // 2. Проверяем, как проголосовал ТЕКУЩИЙ пользователь
+        if (state.user) {
+            const { data: myVote } = await supabaseClient.from('stream_votes').select('vote_type').eq('user_id', state.user.id).maybeSingle();
+            state.userVote = myVote ? myVote.vote_type : null;
+        } else {
+            state.userVote = null;
+        }
+        updateVoteUI();
+    }
+
+    function updateVoteUI() {
+        const likeBtn = document.getElementById('likeBtn');
+        const dislikeBtn = document.getElementById('dislikeBtn');
+        
+        likeBtn.classList.remove('active-like');
+        dislikeBtn.classList.remove('active-dislike');
+        
+        if (state.userVote === 'like') likeBtn.classList.add('active-like');
+        if (state.userVote === 'dislike') dislikeBtn.classList.add('active-dislike');
+    }
+
+    async function handleVote(type) {
+        if (!state.user) return openAuth();
+
+        if (state.userVote === type) {
+            // Если уже лайкнул и нажал снова - убираем голос (Toggle OFF)
+            await supabaseClient.from('stream_votes').delete().eq('user_id', state.user.id);
+            state.userVote = null;
+        } else {
+            // Если голоса нет или он другой - ставим новый (Upsert сам заменит старый благодаря Primary Key)
+            await supabaseClient.from('stream_votes').upsert({ user_id: state.user.id, vote_type: type });
+            state.userVote = type;
+        }
+        
+        // Оптимистичное обновление UI (чтобы было мгновенно)
+        updateVoteUI();
+        loadVotes();
+    }
+
     // --- USER PROFILES LOGIC ---
     async function openUserProfile(userId) {
         if (!userId) return;
@@ -286,25 +348,21 @@
         viewProfile.avatar = userProf.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         viewProfile.title = userProf.custom_title;
 
-        // Заполняем UI
         document.getElementById('viewUserAvatar').src = viewProfile.avatar;
         document.getElementById('userNameText').textContent = viewProfile.username;
         
-        // Логика отображения статуса (АДМИН или ОБЫЧНЫЙ)
         const statusEl = document.getElementById('viewUserStatusText');
         if (viewProfile.title) {
             statusEl.textContent = viewProfile.title;
-            statusEl.className = "status-admin"; // Красный стиль
+            statusEl.className = "status-admin"; 
         } else {
             statusEl.textContent = "Пользователь LiveNet";
-            statusEl.className = "status-user"; // Серый стиль
+            statusEl.className = "status-user"; 
         }
 
-        // Подписчики
         const { count } = await supabaseClient.from('subscriptions').select('*', { count: 'exact', head: true }).eq('following_id', userId);
         document.getElementById('viewUserSubs').textContent = count || 0;
 
-        // Проверка подписки
         if (state.user) {
             const { data: sub } = await supabaseClient.from('subscriptions').select('*').eq('follower_id', state.user.id).eq('following_id', userId).single();
             viewProfile.isSubscribed = !!sub;
@@ -316,40 +374,33 @@
     }
 
     function updateProfileControls() {
-        // Проверяем, смотрю ли я свой профиль
         const isMe = (state.user && state.user.id === viewProfile.id);
-        
         const subBtn = document.getElementById('subBtn');
         const dmBtn = document.getElementById('dmBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const overlay = document.getElementById('avatarChangeOverlay');
         const editBtn = document.getElementById('editNickBtn');
 
+        subBtn.classList.remove('hide');
+
         if (isMe) {
-            // ЭТО МОЙ ПРОФИЛЬ
-            subBtn.classList.add('hide'); // Скрываем подписку
-            dmBtn.classList.add('hide');  // Скрываем ЛС
-            
-            logoutBtn.classList.remove('hide'); // Показываем выход
-            overlay.classList.remove('hide');   // Показываем смену аватарки
-            editBtn.classList.remove('hide');   // Показываем смену ника
+            dmBtn.classList.add('hide');  
+            logoutBtn.classList.remove('hide'); 
+            overlay.classList.remove('hide');   
+            editBtn.classList.remove('hide');   
         } else {
-            // ЭТО ЧУЖОЙ ПРОФИЛЬ
-            subBtn.classList.remove('hide');
             dmBtn.classList.remove('hide');
-            
             logoutBtn.classList.add('hide');
             overlay.classList.add('hide');
             editBtn.classList.add('hide');
-            
-            // Логика кнопки подписки для чужого профиля
-            if (viewProfile.isSubscribed) {
-                subBtn.textContent = "ВЫ ПОДПИСАНЫ";
-                subBtn.className = "w-full max-w-xs py-3 bg-[#160d24] text-gray-400 border border-white/20 rounded-full font-bold uppercase hover:bg-white/5 transition";
-            } else {
-                subBtn.textContent = "ПОДПИСАТЬСЯ";
-                subBtn.className = "w-full max-w-xs py-3 bg-white text-black rounded-full font-bold uppercase hover:scale-105 transition shadow-lg";
-            }
+        }
+
+        if (viewProfile.isSubscribed) {
+            subBtn.textContent = "ВЫ ПОДПИСАНЫ";
+            subBtn.className = "w-full max-w-xs py-3 bg-[#160d24] text-gray-400 border border-white/20 rounded-full font-bold uppercase hover:bg-white/5 transition";
+        } else {
+            subBtn.textContent = "ПОДПИСАТЬСЯ";
+            subBtn.className = "w-full max-w-xs py-3 bg-white text-black rounded-full font-bold uppercase hover:scale-105 transition shadow-lg";
         }
     }
 
@@ -363,7 +414,6 @@
             await supabaseClient.from('subscriptions').insert([{ follower_id: state.user.id, following_id: viewProfile.id }]);
             viewProfile.isSubscribed = true;
         }
-        // Обновляем только цифры, не перезагружая всё
         const { count } = await supabaseClient.from('subscriptions').select('*', { count: 'exact', head: true }).eq('following_id', viewProfile.id);
         document.getElementById('viewUserSubs').textContent = count || 0;
         updateProfileControls();
@@ -371,17 +421,14 @@
 
     async function sendDirectMessage() {
         if (!state.user) return openAuth();
-        // Убрали запрет писать самому себе (по желанию)
-        
         const text = prompt(`Личное сообщение для ${viewProfile.username}:`);
         if (!text || !text.trim()) return;
-
         const { error } = await supabaseClient.from('direct_messages').insert([{ sender_id: state.user.id, receiver_id: viewProfile.id, text: text }]);
         if (error) alert("Ошибка: " + error.message);
         else alert("✅ Отправлено!");
     }
 
-    // --- AUTH ---
+    // --- AUTH & OTHER ---
     async function handleAuth() {
         const email = document.getElementById('authEmail').value;
         const pass = document.getElementById('authPassword').value;
@@ -403,7 +450,6 @@
     }
     function toggleAuthMode() { authMode = authMode === 'login' ? 'register' : 'login'; document.getElementById('authTitle').textContent = authMode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ'; }
 
-    // --- CHAT ---
     function startMuteChecker() {
         if (muteInterval) clearInterval(muteInterval);
         muteInterval = setInterval(() => {
@@ -469,7 +515,6 @@
     async function modDel(id) { await supabaseClient.from('messages').update({ is_deleted: true }).eq('id', id); loadMessages(); }
     async function modBan(uid, ban) { await supabaseClient.from('profiles').update({ is_banned: ban }).eq('id', uid); }
 
-    // --- DB ---
     async function loadDB() {
         const { data } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single();
         if (!data) return;
@@ -562,7 +607,6 @@
         document.getElementById('playerView').classList.toggle('hide', v !== 'player');
         document.getElementById('adminView').classList.toggle('hide', v !== 'admin');
         document.getElementById('userProfileView').classList.toggle('hide', v !== 'userProfile');
-        
         if (v !== 'player') { 
             const iframe = document.getElementById('streamIframe');
             iframe.src = ""; 
@@ -591,7 +635,15 @@
     function openProfileModal() { if(!state.user) openAuth(); else document.getElementById('profileModal').classList.remove('hide'); }
     function openAuth() { document.getElementById('authModal').classList.remove('hide'); }
     function closeModals() { document.querySelectorAll('.fixed').forEach(m => m.classList.add('hide')); }
-    function logoutUser() { supabaseClient.auth.signOut(); sessionStorage.clear(); location.reload(); }
+    
+    async function logoutUser() { 
+        await supabaseClient.auth.signOut(); 
+        state.user = null;
+        state.profile = null;
+        sessionStorage.clear(); 
+        localStorage.clear();
+        location.reload(); 
+    }
 
     init();
   </script>
