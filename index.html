@@ -27,7 +27,7 @@
     .msg-sent { background: #ec4899; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
     .msg-received { background: #374151; color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
     .dialog-item:hover { background: rgba(255,255,255,0.05); }
-    .dialog-item.active { background: rgba(236, 72, 153, 0.1); border-left: 3px solid #ec4899; }
+    .dialog-item.active { background: rgba(255,255,255,0.1); border-left: 3px solid #ec4899; }
 
     /* Кнопки голосования */
     .vote-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 99px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; transition: all 0.2s; }
@@ -35,57 +35,43 @@
     .vote-btn.active-like { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #10B981; }
     .vote-btn.active-dislike { background: rgba(239, 68, 68, 0.2); border-color: #EF4444; color: #EF4444; }
 
-    /* Бегущая строка (Исправленная: Плавная и Линейная) */
+    /* Бегущая строка (Линейная) */
     .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 40px; display: flex; align-items: center; position: relative; }
-    .ticker { white-space: nowrap; position: absolute; animation: ticker 20s linear infinite; }
+    .ticker { white-space: nowrap; position: absolute; animation: ticker 30s linear infinite; }
     .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
-    
-    @keyframes ticker { 
-        0% { transform: translateX(100vw); } 
-        100% { transform: translateX(-100%); } 
-    }
+    @keyframes ticker { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
+    /* Скроллбар (СЕРЫЙ ВМЕСТО ФИОЛЕТОВОГО) */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; } /* Теперь серый */
+    ::-webkit-scrollbar-track { background: #1f2937; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-[#0a0514]">
 
-  <div id="homeView" class="flex-grow flex flex-col items-center justify-center relative min-h-screen py-20">
-    
+  <div id="homeView" class="flex-grow flex flex-col items-center justify-center relative min-h-screen h-screen">
     <div class="absolute top-6 left-8 flex gap-3 z-20">
         <button id="userProfileBtn" onclick="openMyProfile()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
             <div id="miniAvatar" class="w-5 h-5 rounded-full bg-pink-500 overflow-hidden hide"><img id="miniAvatarImg" src="" class="w-full h-full object-cover"></div>
             <span id="topBarUser">Войти</span>
         </button>
-        
         <button id="messengerBtn" onclick="openMessenger()" class="hide bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 relative transition backdrop-blur-md">
             📩
             <div id="unreadDot" class="hide absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
         </button>
     </div>
-    
-    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl z-20" title="Вход админа">🛡️</button>
+    <button id="adminLoginIcon" onclick="openPasswordModal()" class="absolute top-6 right-8 opacity-20 hover:opacity-100 transition text-3xl z-50" title="Вход админа">🛡️</button>
 
-    <h1 class="text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase text-center">LiveNet</h1>
-    
-    <div class="flex flex-col gap-4 w-full max-w-xs mb-12">
-      <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg">▶ СМОТРЕТЬ</button>
-      <a href="https://t.me/livenet_official" target="_blank" class="py-5 bg-[#229ED9] rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic text-center shadow-lg">TELEGRAM</a>
-      <button id="mainMenuAdminBtn" onclick="showView('admin')" class="hide py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px] tracking-widest border border-white/10 mt-2 hover:bg-white/10 text-pink-500">⚙️ Админ панель</button>
+    <h1 class="text-6xl md:text-7xl font-black italic mb-10 text-pink-500 tracking-normal uppercase text-center">LiveNet</h1>
+    <div class="flex flex-col gap-4 w-full max-w-xs px-4">
+      <button onclick="showView('player')" class="py-5 bg-pink-600 rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic shadow-lg w-full">▶ СМОТРЕТЬ ЭФИР</button>
+      <a href="https://t.me/livenet_official" target="_blank" class="py-5 bg-[#229ED9] rounded-2xl font-black text-xl hover:scale-105 transition uppercase italic text-center shadow-lg w-full block">TELEGRAM</a>
+      <button id="mainMenuAdminBtn" onclick="showView('admin')" class="hide py-4 bg-white/5 rounded-2xl font-bold uppercase text-[10px] tracking-widest border border-white/10 mt-2 hover:bg-white/10 text-pink-500 w-full">⚙️ Админ панель</button>
     </div>
-
-    <div class="w-full max-w-[1700px] px-4">
-        <h3 class="text-[10px] font-black uppercase text-gray-600 mb-8 tracking-[0.4em] italic flex items-center gap-2 justify-center md:justify-start">
-            <span class="w-1 h-4 bg-pink-600"></span> ИНФОРМАЦИЯ/ПАРТНЕРЫ
-        </h3>
-        <div id="bannersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-    </div>
-
-    <div class="mt-12 text-[10px] text-gray-600 font-bold uppercase tracking-widest">© Copyright LiveNet 2026</div>
+    <div class="absolute bottom-8 text-[10px] text-gray-600 font-bold uppercase tracking-widest">© Copyright LiveNet 2026</div>
   </div>
 
-  <div id="playerView" class="hide p-4 md:p-8 flex-grow">
+  <div id="playerView" class="hide p-4 md:p-8 flex-grow h-screen overflow-y-auto">
     <button onclick="showView('home')" class="mb-6 opacity-50 hover:opacity-100 transition flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-pink-500">◄ МЕНЮ</button>
 
     <div class="max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-8">
@@ -132,6 +118,13 @@
         </div>
       </div>
     </div>
+
+    <div class="max-w-[1700px] mx-auto mt-16 pb-20 px-4">
+        <h3 class="text-[10px] font-black uppercase text-gray-600 mb-8 tracking-[0.4em] italic flex items-center gap-2">
+            <span class="w-1 h-4 bg-pink-600"></span> ИНФОРМАЦИЯ/ПАРТНЕРЫ
+        </h3>
+        <div id="bannersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    </div>
   </div>
 
   <div id="messengerModal" class="hide fixed inset-0 bg-black/98 flex items-center justify-center z-[140]">
@@ -143,7 +136,7 @@
           </div>
           <div id="chatColumn" class="hidden md:flex w-full md:w-2/3 flex-col bg-[#050208]">
               <div id="chatHeader" class="p-4 border-b border-white/5 flex items-center gap-3">
-                  <button onclick="closeChatMobile()" class="md:hidden text-pink-500 font-bold text-xl mr-2">←</button>
+                  <button onclick="closeChat()" class="text-pink-500 font-bold text-xl mr-2 hover:opacity-80">←</button>
                   <img id="chatHeaderAvatar" class="w-8 h-8 rounded-full bg-gray-800">
                   <span id="chatHeaderName" class="font-bold text-sm">Выберите чат</span>
               </div>
@@ -311,7 +304,8 @@
         loadChat(viewProfile.id, viewProfile.username, viewProfile.avatar);
     }
 
-    function closeChatMobile() {
+    function closeChat() {
+        // УНИВЕРСАЛЬНОЕ ЗАКРЫТИЕ ДИАЛОГА (СТРЕЛКА)
         document.getElementById('dialogsColumn').classList.remove('hidden');
         document.getElementById('chatColumn').classList.add('hidden');
         document.getElementById('chatColumn').classList.remove('flex');
@@ -361,7 +355,11 @@
         const container = document.getElementById('dmMessages');
         container.innerHTML = msgs.map(m => {
             const isMe = m.sender_id === state.user.id;
-            return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}">${m.text}</div></div>`;
+            return `
+            <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-center gap-2">
+                <div class="msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}">${m.text}</div>
+                ${isMe ? `<button onclick="deleteDM('${m.id}')" class="text-[10px] opacity-30 hover:opacity-100">🗑️</button>` : ''}
+            </div>`;
         }).join('');
         container.scrollTop = container.scrollHeight;
         if (msgs.length > 0) {
@@ -374,23 +372,24 @@
         const text = inp.value.trim();
         if (!text || !state.activeChatUser) return;
         const container = document.getElementById('dmMessages');
-        container.innerHTML += `<div class="flex justify-end"><div class="msg-bubble msg-sent">${text}</div></div>`;
+        container.innerHTML += `<div class="flex justify-end items-center gap-2"><div class="msg-bubble msg-sent">${text}</div></div>`;
         container.scrollTop = container.scrollHeight;
         inp.value = '';
         await supabaseClient.from('direct_messages').insert([{ sender_id: state.user.id, receiver_id: state.activeChatUser, text: text }]);
         fetchMessages(); 
     }
 
+    async function deleteDM(msgId) {
+        if(!confirm("Удалить сообщение?")) return;
+        await supabaseClient.from('direct_messages').delete().eq('id', msgId);
+        fetchMessages();
+    }
+
     async function checkUnreadMessages() {
         if (!state.user) return;
         const { count } = await supabaseClient.from('direct_messages').select('*', { count: 'exact', head: true }).eq('receiver_id', state.user.id).eq('is_read', false);
         const dot = document.getElementById('unreadDot');
-        
-        if (count > 0) {
-            dot.classList.remove('hide');
-        } else {
-            dot.classList.add('hide');
-        }
+        if (count > 0) dot.classList.remove('hide'); else dot.classList.add('hide');
         state.lastUnreadCount = count || 0;
     }
 
