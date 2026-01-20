@@ -35,11 +35,11 @@
     .vote-btn.active-like { background: rgba(16, 185, 129, 0.2); border-color: #10B981; color: #10B981; }
     .vote-btn.active-dislike { background: rgba(239, 68, 68, 0.2); border-color: #EF4444; color: #EF4444; }
 
-    /* Бегущая строка */
+    /* Бегущая строка (Ускоренная и оптимизированная) */
     .ticker-wrap { width: 100%; overflow: hidden; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(236, 72, 153, 0.3); height: 40px; display: flex; align-items: center; position: relative; }
-    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 25s linear infinite; }
-    .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 20px; }
-    @keyframes ticker { 0% { transform: translate3d(100vw, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+    .ticker { white-space: nowrap; position: absolute; will-change: transform; animation: ticker 40s linear infinite; } /* Увеличил время, но контент будет длиннее */
+    .ticker-item { display: inline-block; font-size: 16px; font-weight: bold; color: #ec4899; text-transform: uppercase; font-family: 'Poppins', sans-serif; letter-spacing: 1px; padding-right: 0; }
+    @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } } /* Бесконечный цикл через дублирование */
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: #ec4899; border-radius: 10px; }
@@ -50,12 +50,12 @@
   <div id="homeView" class="flex-grow flex flex-col items-center justify-center relative min-h-screen">
     
     <div class="absolute top-6 left-8 flex gap-3 z-20">
-        <button id="userProfileBtn" onclick="openMyProfile()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
+        <button id="userProfileBtn" onclick="openMyProfile(); enableNotifications();" class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-white/10 transition flex items-center gap-2 backdrop-blur-md">
             <div id="miniAvatar" class="w-5 h-5 rounded-full bg-pink-500 overflow-hidden hide"><img id="miniAvatarImg" src="" class="w-full h-full object-cover"></div>
             <span id="topBarUser">Войти</span>
         </button>
         
-        <button id="messengerBtn" onclick="openMessenger()" class="hide bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 relative transition backdrop-blur-md">
+        <button id="messengerBtn" onclick="openMessenger(); enableNotifications();" class="hide bg-white/5 border border-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 relative transition backdrop-blur-md">
             📩
             <div id="unreadDot" class="hide absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
         </button>
@@ -87,7 +87,12 @@
             <iframe id="streamIframe" class="w-full h-full hide" src="" frameborder="0" allowfullscreen="true" scrolling="no"></iframe>
             <div id="playButton" onclick="handlePlayButtonClick()" class="w-20 h-20 bg-pink-600 rounded-full flex items-center justify-center shadow-2xl z-20 cursor-pointer hover:scale-110 transition active:scale-95 hide"><span class="text-3xl ml-1 text-white">▶</span></div>
         </div>
-        <div class="ticker-wrap rounded-b-2xl border-x-2 border-b-2 border-pink-500/30"><div class="ticker"><div id="newsTickerDisplay" class="ticker-item">Загрузка...</div></div></div>
+        <div class="ticker-wrap rounded-b-2xl border-x-2 border-b-2 border-pink-500/30">
+            <div class="ticker">
+                <span id="newsTickerDisplay" class="ticker-item">Загрузка...</span>
+                <span id="newsTickerDisplayDuplicate" class="ticker-item"></span>
+            </div>
+        </div>
       </div>
 
       <div class="lg:w-80 space-y-4">
@@ -225,12 +230,14 @@
       </div>
   </div>
 
+  <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
   <script>
     const SUPABASE_URL = "https://mqcakdxhkwugckvuqygs.supabase.co";
     const SUPABASE_KEY = "sb_publishable_h-EbNY3-ziEUt_i4PmQ1gw_cmzSR2OH"; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let state = { user: null, profile: null, isLive: false, streamName: '', banners: [], schedule: '', isAdmin: false, ticker: '', userVote: null, tempEmail: '', activeChatUser: null };
+    let state = { user: null, profile: null, isLive: false, streamName: '', banners: [], schedule: '', isAdmin: false, ticker: '', userVote: null, tempEmail: '', activeChatUser: null, lastUnreadCount: 0 };
     let viewProfile = { id: null, username: '', avatar: '', isSubscribed: false, title: null };
     let authMode = 'login';
     let muteInterval = null;
@@ -258,8 +265,7 @@
             }
             state.profile = prof;
             renderProfile();
-            requestNotificationPermission();
-            setInterval(checkUnreadMessages, 2000); // Быстрая проверка ЛС
+            setInterval(checkUnreadMessages, 2000);
         }
         
         if (state.isAdmin) {
@@ -269,9 +275,9 @@
 
         loadDB();
         loadVotes();
-        setInterval(loadDB, 2000); // Быстрое обновление статуса (2 сек)
-        setInterval(loadMessages, 2000); // Быстрый чат (2 сек)
-        setInterval(loadVotes, 3000); // Лайки (3 сек)
+        setInterval(loadDB, 2000);
+        setInterval(loadMessages, 2000);
+        setInterval(loadVotes, 3000);
         startMuteChecker();
     }
 
@@ -283,7 +289,8 @@
         document.getElementById('messengerBtn').classList.remove('hide');
     }
 
-    function requestNotificationPermission() {
+    // --- NOTIFICATIONS ---
+    function enableNotifications() {
         if (Notification.permission !== "granted") {
             Notification.requestPermission();
         }
@@ -292,6 +299,7 @@
     // --- MESSENGER LOGIC ---
     async function openMessenger() {
         if(!state.user) return openAuth();
+        enableNotifications();
         document.getElementById('messengerModal').classList.remove('hide');
         document.getElementById('dialogsColumn').classList.remove('hidden');
         document.getElementById('chatColumn').classList.add('hidden');
@@ -301,6 +309,7 @@
 
     async function openMessengerWithUser() {
         if(!state.user) return openAuth();
+        enableNotifications();
         document.getElementById('messengerModal').classList.remove('hide');
         loadChat(viewProfile.id, viewProfile.username, viewProfile.avatar);
     }
@@ -346,7 +355,7 @@
         
         fetchMessages();
         if (msgInterval) clearInterval(msgInterval);
-        msgInterval = setInterval(fetchMessages, 2000); // Быстрый мессенджер
+        msgInterval = setInterval(fetchMessages, 2000);
     }
 
     async function fetchMessages() {
@@ -358,6 +367,11 @@
             return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}">${m.text}</div></div>`;
         }).join('');
         container.scrollTop = container.scrollHeight;
+        
+        // Mark as read if opened
+        if (msgs.length > 0) {
+             await supabaseClient.from('direct_messages').update({ is_read: true }).eq('receiver_id', state.user.id).eq('sender_id', state.activeChatUser);
+        }
     }
 
     async function sendDM() {
@@ -365,21 +379,33 @@
         const text = inp.value.trim();
         if (!text || !state.activeChatUser) return;
         
-        // Optimistic UI (Мгновенное добавление)
         const container = document.getElementById('dmMessages');
         container.innerHTML += `<div class="flex justify-end"><div class="msg-bubble msg-sent">${text}</div></div>`;
         container.scrollTop = container.scrollHeight;
         inp.value = '';
 
         await supabaseClient.from('direct_messages').insert([{ sender_id: state.user.id, receiver_id: state.activeChatUser, text: text }]);
-        fetchMessages(); // Sync to be sure
+        fetchMessages(); 
     }
 
     async function checkUnreadMessages() {
         if (!state.user) return;
         const { count } = await supabaseClient.from('direct_messages').select('*', { count: 'exact', head: true }).eq('receiver_id', state.user.id).eq('is_read', false);
         const dot = document.getElementById('unreadDot');
-        if (count > 0) dot.classList.remove('hide'); else dot.classList.add('hide');
+        
+        if (count > 0) {
+            dot.classList.remove('hide');
+            if (count > state.lastUnreadCount) {
+                // New message arrived!
+                try { document.getElementById('notifSound').play(); } catch(e){}
+                if (Notification.permission === "granted") {
+                    new Notification("LiveNet", { body: "У вас новое сообщение!", icon: "https://cdn-icons-png.flaticon.com/512/1041/1041916.png" });
+                }
+            }
+        } else {
+            dot.classList.add('hide');
+        }
+        state.lastUnreadCount = count || 0;
     }
 
     // --- VOTES ---
@@ -400,11 +426,9 @@
     }
     async function handleVote(type) {
         if (!state.user) return openAuth();
-        // Optimistic UI
         const oldVote = state.userVote;
         state.userVote = (state.userVote === type) ? null : type;
         updateVoteUI(); 
-
         if (oldVote === type) { await supabaseClient.from('stream_votes').delete().eq('user_id', state.user.id); }
         else { await supabaseClient.from('stream_votes').upsert({ user_id: state.user.id, vote_type: type }); }
         loadVotes();
@@ -454,6 +478,7 @@
         const pass = document.getElementById('authPassword').value;
         const errEl = document.getElementById('emailError'); errEl.classList.add('hide');
         if (!email || !pass) return alert("Заполни все поля!");
+        enableNotifications(); // Ask on click
         if (authMode === 'register') {
             const { data: isBusy } = await supabaseClient.rpc('check_email', { email_to_check: email });
             if (isBusy) { errEl.classList.remove('hide'); return; }
@@ -482,14 +507,9 @@
         const inp = document.getElementById('msgInp'); 
         const txt = inp.value.trim();
         if (!txt || state.profile.is_banned) return; 
-        
-        // Optimistic UI for Chat
         const chat = document.getElementById('chatMessages');
-        const isMe = true; 
-        // Временное добавление
         chat.innerHTML = `<div class="flex gap-2 mb-2 group items-start"><img src="${state.profile.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10"><div class="flex-1 min-w-0"><span class="${state.isAdmin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${state.profile.username}:</span><span class="text-white ml-1 break-all text-xs">${txt}</span></div></div>` + chat.innerHTML;
         inp.value = '';
-
         await supabaseClient.from('messages').insert([{ username: state.profile.username, text: txt, user_id: state.user.id, avatar_url: state.profile.avatar_url, is_admin: state.isAdmin }]); 
         loadMessages(); 
     }
@@ -502,7 +522,6 @@
         const { data } = await supabaseClient.from('site_settings').select('*').eq('id', 1).single(); if (!data) return; 
         state.isLive = data.is_live; state.streamName = data.stream_name; state.banners = data.banners || []; state.schedule = data.schedule || ''; 
         
-        // BUG FIX: OFFLINE STATE
         if (!state.isLive) {
             document.getElementById('streamIframe').src = "";
             document.getElementById('streamIframe').classList.add('hide');
@@ -515,7 +534,14 @@
              }
         }
 
-        if (data.news_ticker && data.news_ticker !== state.ticker) { state.ticker = data.news_ticker; document.getElementById('newsTickerDisplay').textContent = state.ticker; } 
+        // Ticker Logic with Duplication
+        if (data.news_ticker && data.news_ticker !== state.ticker) { 
+            state.ticker = data.news_ticker;
+            // Дублируем текст много раз
+            const fullText = (state.ticker + "  ✦  ").repeat(10);
+            document.getElementById('newsTickerDisplay').textContent = fullText;
+            document.getElementById('newsTickerDisplayDuplicate').textContent = fullText;
+        } 
         document.getElementById('streamNameDisplay').textContent = state.streamName; document.getElementById('statusDot').className = state.isLive ? "w-1.5 h-1.5 bg-red-500 animate-pulse rounded-full" : "w-1.5 h-1.5 bg-gray-600 rounded-full"; document.getElementById('statusText').textContent = state.isLive ? "В ЭФИРЕ" : "ОФФЛАЙН"; document.getElementById('statusText').className = `text-[9px] font-black uppercase ${state.isLive ? 'text-red-500' : 'text-gray-500'} tracking-[0.2em] font-stream`; const btn = document.getElementById('liveToggleBtn'); btn.textContent = state.isLive ? "🔴 ОСТАНОВИТЬ" : "⚪ ЗАПУСТИТЬ"; btn.className = `w-full py-5 rounded-2xl font-black transition text-xl uppercase italic ${state.isLive ? 'bg-red-600' : 'bg-green-600'}`; document.getElementById('scheduleContainer').innerHTML = state.schedule.split('\n').filter(l=>l.trim()).map(l => `<div class="bg-white/5 p-3 rounded-xl border border-white/5 text-gray-300 font-stream">${l}</div>`).join('') || '<div class="opacity-30 text-[10px]">Нет программы</div>'; document.getElementById('bannersContainer').innerHTML = state.banners.map(b => `<a href="${b.url}" target="_blank" class="banner-card block hover:scale-[1.02] transition"><img src="${b.img}" class="w-full aspect-video object-cover"><div class="p-4"><h4 class="text-pink-500 font-bold text-xs uppercase mb-1">${b.title}</h4><p class="text-[10px] text-gray-500 font-stream">${b.desc}</p></div></a>`).join(''); if (state.isAdmin && !areInputsPopulated) { document.getElementById('streamNameInput').value = state.streamName; document.getElementById('scheduleTextarea').value = state.schedule; document.getElementById('tickerInput').value = state.ticker; const list = document.getElementById('adminBannersList'); if (list.children.length === 0) state.banners.forEach(b => addBanner(b)); areInputsPopulated = true; } 
     }
     async function saveSettings() { const bannerEls = document.querySelectorAll('.admin-banner-item'); const newBanners = Array.from(bannerEls).map(el => ({ img: el.querySelector('.b-img').value, title: el.querySelector('.b-title').value, desc: el.querySelector('.b-desc').value, url: el.querySelector('.b-url').value })); const newName = document.getElementById('streamNameInput').value; const newSched = document.getElementById('scheduleTextarea').value; const newTicker = document.getElementById('tickerInput').value; await supabaseClient.from('site_settings').upsert({ id: 1, is_live: state.isLive, stream_name: newName, schedule: newSched, banners: newBanners, news_ticker: newTicker }); alert("Сохранено!"); loadDB(); }
