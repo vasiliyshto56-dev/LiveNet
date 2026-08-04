@@ -259,29 +259,49 @@
     let muteInterval = null;
     let areInputsPopulated = false;
     let msgInterval = null;
+    let chatScrollTimeout = null;
 
     if (sessionStorage.getItem('isLiveNetAdmin') === 'true') { state.isAdmin = true; }
+
+    // Утилита для безопасного HTML
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
     async function init() {
         setInterval(() => {
             const time = new Intl.DateTimeFormat('ru-RU', {timeZone: 'Europe/Moscow', hour: '2-digit', minute:'2-digit', second: '2-digit'}).format(new Date());
-            document.getElementById('moscowTime').innerHTML = `${time} <span class="opacity-40 text-[9px] ml-1">(МСК)</span>`;
+            const el = document.getElementById('moscowTime');
+            if (el) el.innerHTML = `${time} <span class="opacity-40 text-[9px] ml-1">(МСК)</span>`;
         }, 1000);
 
         const channel = supabaseClient.channel('room_1', { config: { presence: { key: Math.random().toString(36).substring(7) } } });
-        channel.on('presence', { event: 'sync' }, () => document.getElementById('realOnlineCount').textContent = Object.keys(channel.presenceState()).length).subscribe(async (status) => { if (status === 'SUBSCRIBED') await channel.track({ online_at: new Date().toISOString() }); });
+        channel.on('presence', { event: 'sync' }, () => {
+            const countEl = document.getElementById('realOnlineCount');
+            if (countEl) countEl.textContent = Object.keys(channel.presenceState()).length;
+        }).subscribe(async (status) => { if (status === 'SUBSCRIBED') await channel.track({ online_at: new Date().toISOString() }); });
 
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (user) {
-            state.user = user;
-            refreshMyProfile();
-            setInterval(refreshMyProfile, 2000);
-            setInterval(checkUnreadMessages, 2000); 
+        try {
+            const { data: { user }, error } = await supabaseClient.auth.getUser();
+            if (error) throw error;
+            if (user) {
+                state.user = user;
+                await refreshMyProfile();
+                setInterval(refreshMyProfile, 2000);
+                setInterval(checkUnreadMessages, 2000); 
+            }
+        } catch (e) {
+            console.error('Auth error:', e);
         }
         
         if (state.isAdmin) {
-            document.getElementById('mainMenuAdminBtn').classList.remove('hide');
-            document.getElementById('adminLoginIcon').classList.add('hide');
+            const adminBtn = document.getElementById('mainMenuAdminBtn');
+            const adminIcon = document.getElementById('adminLoginIcon');
+            if (adminBtn) adminBtn.classList.remove('hide');
+            if (adminIcon) adminIcon.classList.add('hide');
         }
 
         loadDB();
@@ -294,21 +314,31 @@
 
     async function refreshMyProfile() {
         if (!state.user) return;
-        const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', state.user.id).single();
-        if (prof) {
-            state.profile = prof;
-            renderProfile();
-        } else {
-            await supabaseClient.from('profiles').insert([{ id: state.user.id, username: state.user.email.split('@')[0], avatar_url: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }]);
+        try {
+            const { data: prof, error } = await supabaseClient.from('profiles').select('*').eq('id', state.user.id).single();
+            if (error) throw error;
+            if (prof) {
+                state.profile = prof;
+                renderProfile();
+            } else {
+                await supabaseClient.from('profiles').insert([{ id: state.user.id, username: state.user.email.split('@')[0], avatar_url: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }]);
+            }
+        } catch (e) {
+            console.error('Profile refresh error:', e);
         }
     }
 
     function renderProfile() {
         if (!state.profile) return;
-        document.getElementById('topBarUser').textContent = state.profile.username;
-        document.getElementById('miniAvatar').classList.remove('hide');
-        document.getElementById('miniAvatarImg').src = state.profile.avatar_url;
-        document.getElementById('messengerBtn').classList.remove('hide');
+        const topBarUser = document.getElementById('topBarUser');
+        const miniAvatar = document.getElementById('miniAvatar');
+        const miniAvatarImg = document.getElementById('miniAvatarImg');
+        const messengerBtn = document.getElementById('messengerBtn');
+        
+        if (topBarUser) topBarUser.textContent = state.profile.username;
+        if (miniAvatar) miniAvatar.classList.remove('hide');
+        if (miniAvatarImg && state.profile.avatar_url) miniAvatarImg.src = state.profile.avatar_url;
+        if (messengerBtn) messengerBtn.classList.remove('hide');
     }
 
     async function openMessenger() {
@@ -335,8 +365,9 @@
     }
 
     async function loadDialogs() {
-        const { data: msgs } = await supabaseClient.from('direct_messages').select('sender_id, receiver_id, created_at, is_read').or(`sender_id.eq.${state.user.id},receiver_id.eq.${state.user.id}`).order('created_at', { ascending: false });
-        if (!msgs) return;
+        if (!state.user) return;
+        const { data: msgs, error } = await supabaseClient.from('direct_messages').select('sender_id, receiver_id, created_at, is_read').or(`sender_id.eq.${state.user.id},receiver_id.eq.${state.user.id}`).order('created_at', { ascending: false });
+        if (error || !msgs) return;
         const uniqueUsers = new Set();
         const dialogs = [];
         for (const m of msgs) {
@@ -347,23 +378,39 @@
             }
         }
         const listEl = document.getElementById('dialogsList');
+        if (!listEl) return;
         listEl.innerHTML = '';
         for (const d of dialogs) {
-            const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', d.id).single();
-            if(prof) {
-                listEl.innerHTML += `<div onclick="loadChat('${prof.id}', '${prof.username}', '${prof.avatar_url}')" class="dialog-item p-3 cursor-pointer border-b border-white/5 flex items-center gap-3"><img src="${prof.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-8 h-8 rounded-full object-cover"><div class="flex-1"><div class="font-bold text-xs text-white">${prof.username}</div><div class="text-[9px] text-gray-500">Нажмите для переписки</div></div></div>`;
+            try {
+                const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', d.id).single();
+                if(prof) {
+                    const safeName = escapeHtml(prof.username);
+                    const safeAvatar = escapeHtml(prof.avatar_url) || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                    const safeId = String(prof.id).replace(/'/g, "\\'");
+                    listEl.innerHTML += `<div onclick="loadChat('${safeId}', '${safeName}', '${safeAvatar}')" class="dialog-item p-3 cursor-pointer border-b border-white/5 flex items-center gap-3"><img src="${safeAvatar}" class="w-8 h-8 rounded-full object-cover"><div class="flex-1"><div class="font-bold text-xs text-white">${safeName}</div><div class="text-[9px] text-gray-500">Нажмите для переписки</div></div></div>`;
+                }
+            } catch (e) {
+                console.error('Profile load error:', e);
             }
         }
     }
 
     async function loadChat(partnerId, name, avatar) {
         state.activeChatUser = partnerId;
-        document.getElementById('dialogsColumn').classList.add('hidden'); 
-        document.getElementById('chatColumn').classList.remove('hidden'); 
-        document.getElementById('chatColumn').classList.add('flex');
-        document.getElementById('dmInputArea').classList.remove('hide');
-        document.getElementById('chatHeaderName').textContent = name;
-        document.getElementById('chatHeaderAvatar').src = avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const dialogsColumn = document.getElementById('dialogsColumn');
+        const chatColumn = document.getElementById('chatColumn');
+        const dmInputArea = document.getElementById('dmInputArea');
+        const chatHeaderName = document.getElementById('chatHeaderName');
+        const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
+        
+        if (dialogsColumn) dialogsColumn.classList.add('hidden');
+        if (chatColumn) {
+            chatColumn.classList.remove('hidden');
+            chatColumn.classList.add('flex');
+        }
+        if (dmInputArea) dmInputArea.classList.remove('hide');
+        if (chatHeaderName) chatHeaderName.textContent = name || 'Чат';
+        if (chatHeaderAvatar) chatHeaderAvatar.src = avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
         
         fetchMessages();
         if (msgInterval) clearInterval(msgInterval);
@@ -372,13 +419,19 @@
 
     async function fetchMessages() {
         if (!state.activeChatUser) return;
-        const { data: msgs } = await supabaseClient.from('direct_messages').select('*').or(`and(sender_id.eq.${state.user.id},receiver_id.eq.${state.activeChatUser}),and(sender_id.eq.${state.activeChatUser},receiver_id.eq.${state.user.id})`).order('created_at', { ascending: true });
+        const { data: msgs, error } = await supabaseClient.from('direct_messages').select('*').or(`and(sender_id.eq.${state.user.id},receiver_id.eq.${state.activeChatUser}),and(sender_id.eq.${state.activeChatUser},receiver_id.eq.${state.user.id})`).order('created_at', { ascending: true });
         const container = document.getElementById('dmMessages');
+        if (!container) return;
+        if (error || !msgs) {
+            container.innerHTML = '<div class="text-gray-500 text-xs text-center">Ошибка загрузки</div>';
+            return;
+        }
         container.innerHTML = msgs.map(m => {
             const isMe = m.sender_id === state.user.id;
+            const safeText = escapeHtml(m.text);
             return `
             <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-center gap-2">
-                <div class="msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}">${m.text}</div>
+                <div class="msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}">${safeText}</div>
                 ${isMe ? `<button onclick="deleteDM('${m.id}')" class="text-[10px] opacity-30 hover:opacity-100">🗑️</button>` : ''}
             </div>`;
         }).join('');
@@ -390,13 +443,15 @@
 
     async function sendDM() {
         const inp = document.getElementById('dmInput');
+        if (!inp) return;
         const text = inp.value.trim();
         if (!text || !state.activeChatUser) return;
         
         if (state.profile.is_banned) return alert("Вы забанены!");
 
         const container = document.getElementById('dmMessages');
-        container.innerHTML += `<div class="flex justify-end items-center gap-2"><div class="msg-bubble msg-sent">${text}</div></div>`;
+        const safeText = escapeHtml(text);
+        container.innerHTML += `<div class="flex justify-end items-center gap-2"><div class="msg-bubble msg-sent">${safeText}</div></div>`;
         container.scrollTop = container.scrollHeight;
         inp.value = '';
         await supabaseClient.from('direct_messages').insert([{ sender_id: state.user.id, receiver_id: state.activeChatUser, text: text }]);
@@ -419,27 +474,50 @@
 
     // --- VOTES ---
     async function loadVotes() {
-        const { count: likes } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'like');
-        const { count: dislikes } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'dislike');
-        document.getElementById('likeCount').textContent = likes || 0;
-        document.getElementById('dislikeCount').textContent = dislikes || 0;
-        if (state.user) {
-            const { data: myVote } = await supabaseClient.from('stream_votes').select('vote_type').eq('user_id', state.user.id).maybeSingle();
-            state.userVote = myVote ? myVote.vote_type : null;
+        try {
+            const { count: likes, error: likeErr } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'like');
+            const { count: dislikes, error: dislikeErr } = await supabaseClient.from('stream_votes').select('*', { count: 'exact', head: true }).eq('vote_type', 'dislike');
+            
+            const likeCountEl = document.getElementById('likeCount');
+            const dislikeCountEl = document.getElementById('dislikeCount');
+            
+            if (likeCountEl) likeCountEl.textContent = (likes || 0);
+            if (dislikeCountEl) dislikeCountEl.textContent = (dislikes || 0);
+            
+            if (state.user) {
+                const { data: myVote, error: voteErr } = await supabaseClient.from('stream_votes').select('vote_type').eq('user_id', state.user.id).maybeSingle();
+                if (voteErr) console.error('Vote fetch error:', voteErr);
+                state.userVote = myVote ? myVote.vote_type : null;
+            }
+            updateVoteUI();
+        } catch (e) {
+            console.error('Load votes error:', e);
         }
-        updateVoteUI();
     }
+    
     function updateVoteUI() {
-        document.getElementById('likeBtn').classList.toggle('active-like', state.userVote === 'like');
-        document.getElementById('dislikeBtn').classList.toggle('active-dislike', state.userVote === 'dislike');
+        const likeBtn = document.getElementById('likeBtn');
+        const dislikeBtn = document.getElementById('dislikeBtn');
+        if (likeBtn) likeBtn.classList.toggle('active-like', state.userVote === 'like');
+        if (dislikeBtn) dislikeBtn.classList.toggle('active-dislike', state.userVote === 'dislike');
     }
+    
     async function handleVote(type) {
         if (!state.user) return openAuth();
         const oldVote = state.userVote;
         state.userVote = (state.userVote === type) ? null : type;
         updateVoteUI(); 
-        if (oldVote === type) { await supabaseClient.from('stream_votes').delete().eq('user_id', state.user.id); }
-        else { await supabaseClient.from('stream_votes').upsert({ user_id: state.user.id, vote_type: type }); }
+        try {
+            if (oldVote === type) { 
+                await supabaseClient.from('stream_votes').delete().eq('user_id', state.user.id); 
+            } else { 
+                await supabaseClient.from('stream_votes').upsert({ user_id: state.user.id, vote_type: type }); 
+            }
+        } catch (e) {
+            console.error('Vote submit error:', e);
+            state.userVote = oldVote;
+            updateVoteUI();
+        }
         loadVotes();
     }
 
@@ -513,6 +591,7 @@
     // --- CHAT & DB & PIN SYSTEM ---
     async function sendMsg() { 
         const inp = document.getElementById('msgInp'); 
+        if (!inp) return;
         const txt = inp.value.trim();
         if (!txt || state.profile?.is_banned) return; 
         
@@ -521,9 +600,15 @@
         }
 
         const chat = document.getElementById('chatMessages');
+        if (!chat) return;
         const isAtBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 100;
         
-        chat.innerHTML = `<div class="flex gap-2 mb-2 group items-start"><img src="${state.profile.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10"><div class="flex-1 min-w-0"><span class="${state.isAdmin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${state.profile.username}:</span><span class="text-white ml-1 break-all text-xs">${txt}</span></div></div>` + chat.innerHTML;
+        const safeTxt = escapeHtml(txt);
+        const avatarSrc = escapeHtml(state.profile.avatar_url) || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+        const nickClass = state.isAdmin ? 'nick-admin' : 'text-pink-500';
+        const usernameSafe = escapeHtml(state.profile.username);
+        
+        chat.innerHTML = `<div class="flex gap-2 mb-2 group items-start"><img src="${avatarSrc}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10"><div class="flex-1 min-w-0"><span class="${nickClass} font-bold text-[11px]">${usernameSafe}:</span><span class="text-white ml-1 break-all text-xs">${safeTxt}</span></div></div>` + chat.innerHTML;
         
         if (isAtBottom) chat.scrollTop = chat.scrollHeight; 
         inp.value = '';
@@ -532,23 +617,28 @@
     }
     
     async function loadMessages() { 
-        const { data } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false }).limit(40); 
-        if (!data) return; 
+        const { data, error } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: false }).limit(40); 
+        if (error || !data) return; 
         
         const chat = document.getElementById('chatMessages');
+        if (!chat) return;
         const isAtBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 100;
 
-        document.getElementById('chatMessages').innerHTML = data.reverse().map(m => { 
+        chat.innerHTML = data.reverse().map(m => { 
             if (m.is_deleted && !state.isAdmin) return ''; 
             const isDel = m.is_deleted && state.isAdmin; 
-            const safeText = m.text.replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+            const safeText = escapeHtml(m.text);
+            const safeUsername = escapeHtml(m.username);
+            const safeAvatar = escapeHtml(m.avatar_url) || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            const userIdSafe = String(m.user_id).replace(/'/g, "\\'");
             
             // ADMIN CONTROLS UPDATE (UNMUTE/UNBAN)
             let adminControls = '';
             if (state.isAdmin && !m.is_deleted) {
+                const pinTextSafe = escapeHtml(m.text).replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 adminControls = `
                     <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition">
-                        <button onclick="pinMsg('${m.username}', '${safeText}')" title="Закрепить">📌</button>
+                        <button onclick="pinMsg('${safeUsername}', '${pinTextSafe}')" title="Закрепить">📌</button>
                         <button onclick="modDel('${m.id}')" title="Удалить">🗑️</button>
                         <button onclick="modMute('${m.user_id}', true)" title="Мут">🔇</button>
                         <button onclick="modMute('${m.user_id}', false)" title="Размут">🔊</button>
@@ -566,14 +656,14 @@
 
             return `
             <div class="flex gap-2 mb-2 group items-start">
-                <button onclick="openUserProfile('${m.user_id}')" class="hover:opacity-70 transition">
-                    <img src="${m.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10">
+                <button onclick="openUserProfile('${userIdSafe}')" class="hover:opacity-70 transition">
+                    <img src="${safeAvatar}" class="w-6 h-6 rounded-full object-cover mt-0.5 border border-white/10">
                 </button>
                 <div class="flex-1 min-w-0">
-                    <button onclick="openUserProfile('${m.user_id}')" class="hover:underline text-left">
-                        <span class="${m.is_admin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${m.username}:</span>
+                    <button onclick="openUserProfile('${userIdSafe}')" class="hover:underline text-left">
+                        <span class="${m.is_admin ? 'nick-admin' : 'text-pink-500'} font-bold text-[11px]">${safeUsername}:</span>
                     </button>
-                    <span class="text-white ml-1 break-all text-xs ${isDel ? 'deleted-msg' : ''}">${isDel ? '(Удалено) ' + m.text : m.text}</span>
+                    <span class="text-white ml-1 break-all text-xs ${isDel ? 'deleted-msg' : ''}">${isDel ? '(Удалено) ' + safeText : safeText}</span>
                 </div>
                 ${adminControls}
             </div>`; 
@@ -584,7 +674,8 @@
 
     async function pinMsg(author, text) {
         if(!confirm('Закрепить сообщение?')) return;
-        await supabaseClient.from('site_settings').update({ pinned_text: text, pinned_author: author }).eq('id', 1);
+        const safeAuthor = escapeHtml(author);
+        await supabaseClient.from('site_settings').update({ pinned_text: text, pinned_author: safeAuthor }).eq('id', 1);
         loadDB();
     }
 
@@ -596,23 +687,35 @@
 
     // MODERATION FUNCTIONS
     async function modMute(uid, mute) { 
-        const until = mute ? new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() : null; // null removes mute
-        await supabaseClient.from('profiles').update({ muted_until: until }).eq('id', uid); 
+        const until = mute ? new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() : null;
+        const { error } = await supabaseClient.from('profiles').update({ muted_until: until }).eq('id', uid);
+        if (error) {
+            console.error('Mute error:', error);
+            alert('Ошибка при муте');
+            return;
+        }
         alert(mute ? "Пользователь замучен на 3 часа" : "Мут снят");
     }
     
     async function modBan(uid, ban) { 
-        await supabaseClient.from('profiles').update({ is_banned: ban }).eq('id', uid); 
+        const { error } = await supabaseClient.from('profiles').update({ is_banned: ban }).eq('id', uid);
+        if (error) {
+            console.error('Ban error:', error);
+            alert('Ошибка при бане');
+            return;
+        }
         alert(ban ? "Пользователь забанен" : "Бан снят");
     }
 
     async function modDel(id) { 
-        await supabaseClient.from('messages').update({ is_deleted: true }).eq('id', id); 
+        const { error } = await supabaseClient.from('messages').update({ is_deleted: true }).eq('id', id);
+        if (error) console.error('Delete error:', error);
         loadMessages(); 
     }
 
     async function modRestore(id) {
-        await supabaseClient.from('messages').update({ is_deleted: false }).eq('id', id);
+        const { error } = await supabaseClient.from('messages').update({ is_deleted: false }).eq('id', id);
+        if (error) console.error('Restore error:', error);
         loadMessages();
     }
     
